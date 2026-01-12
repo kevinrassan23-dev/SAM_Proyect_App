@@ -52,7 +52,7 @@ export default function Menu() {
             style={styles.drawerItem}
             onPress={() => {
               cerrarMenu();
-              router.push("./home");
+              router.push("./Home");
             }}
           >
             <MaterialIcons name="home" size={24} color={theme.colors.primary} />
@@ -63,7 +63,7 @@ export default function Menu() {
             style={styles.drawerItem}
             onPress={() => {
               cerrarMenu();
-              router.push("./hall");
+              router.push("./Hall");
             }}
           >
             <MaterialIcons name="meeting-room" size={24} color={theme.colors.primary} />

@@ -1,19 +1,31 @@
 import React, { useState } from "react";
-import {View,Text,StyleSheet,Pressable,FlatList,Modal,} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  FlatList,
+  Modal,
+  Image,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Product {
   id: string;
-  name: string;
-  price: number;
+  nombre: string;
+  marca: string;
+  tipo: string;
+  precio: number;
 }
 
 const receta: Product[] = [
-  { id: "1", name: "Nombre", price: 3.5 },
-  { id: "2", name: "Nombre", price: 5.2 },
-];
-
-const tienda: Product[] = [
-  { id: "3", name: "Nombre", price: 2.1 },
+  {
+    id: "1",
+    nombre: "Medicamento A",
+    marca: "Marca X",
+    tipo: "Tabletas",
+    precio: 5.0,
+  },
 ];
 
 const categorias = [
@@ -29,65 +41,97 @@ const categorias = [
 export default function Hall() {
   const [showFilter, setShowFilter] = useState(false);
 
-  const total =
-    receta.reduce((acc, p) => acc + p.price, 0) +
-    tienda.reduce((acc, p) => acc + p.price, 0);
+  const [sinReceta, setSinReceta] = useState<Product[]>([
+    {
+      id: "2",
+      nombre: "Medicamento B",
+      marca: "Marca Y",
+      tipo: "Jarabe",
+      precio: 4.5,
+    },
+  ]);
+
+  const handleAddCategoria = (categoria: string) => {
+    const nuevoProducto: Product = {
+      id: Date.now().toString(),
+      nombre: categoria,
+      marca: "Marca Y",
+      tipo: "Jarabe",
+      precio: 4.5,
+    };
+
+    setSinReceta((prev) => [...prev, nuevoProducto]);
+    setShowFilter(false);
+  };
 
   const renderItem = ({ item }: { item: Product }) => (
-    <View style={styles.row}>
-      <Text>{item.name}</Text>
-      <Text>{item.price.toFixed(2)} €</Text>
+    <View style={styles.itemCard}>
+      <Image
+        source={{ uri: "https://via.placeholder.com/70" }}
+        style={styles.itemImage}
+      />
+
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>{item.nombre}</Text>
+        <Text style={styles.itemText}>{item.marca}</Text>
+        <Text style={styles.itemText}>{item.tipo}</Text>
+        <Text style={styles.itemPrice}>{item.precio.toFixed(2)} €</Text>
+      </View>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      //Con Receta
-      <Text style={styles.section}>CON RECETA</Text>
-      <FlatList
-        data={receta}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>CON RECETA</Text>
+          <Text style={styles.subText}>¿Tienes receta?</Text>
+        </View>
 
-      //Sin receta/Tienda
-      <Text style={styles.section}>TIENDA</Text>
-      <FlatList
-        data={tienda}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+        <FlatList
+          data={receta}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+        />
+      </View>
 
-      //Total
-      <Text style={styles.total}>TOTAL: {total.toFixed(2)} €</Text>
+      <View style={styles.card}>
+        <View style={styles.cardHeaderRow}>
+          <Text style={styles.cardTitle}>SIN RECETA</Text>
 
-      //Todos los botones
-      <Pressable style={styles.buy}>
-        <Text style={styles.buttonText}>COMPRAR</Text>
-      </Pressable>
+          <Pressable
+            style={styles.filterButton}
+            onPress={() => setShowFilter(true)}
+          >
+            <MaterialIcons name="filter-list" size={18} color="#2DC653" />
+            <Text style={styles.filterText}>Filtrar medicamentos</Text>
+          </Pressable>
+        </View>
 
-      <Pressable style={styles.cancel}>
-        <Text style={styles.buttonText}>CANCELAR COMPRA</Text>
-      </Pressable>
+        <FlatList
+          data={sinReceta}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+        />
+      </View>
 
-      <Pressable onPress={() => setShowFilter(true)}>
-        <Text style={styles.filter}>Filtrar medicamentos</Text>
-      </Pressable>
-
-      //Drawer y Filtro
       <Modal visible={showFilter} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={styles.drawer}>
             <Text style={styles.drawerTitle}>FILTRAR MEDICAMENTOS</Text>
 
             {categorias.map((cat) => (
-              <Pressable key={cat} style={styles.drawerItem}>
+              <Pressable
+                key={cat}
+                style={styles.drawerItem}
+                onPress={() => handleAddCategoria(cat)}
+              >
                 <Text>{cat}</Text>
               </Pressable>
             ))}
 
             <Pressable onPress={() => setShowFilter(false)}>
-              <Text style={styles.close}>X</Text>
+              <Text style={styles.close}>Cerrar</Text>
             </Pressable>
           </View>
         </View>
@@ -100,54 +144,87 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: "#fff",
   },
 
-  section: {
-    fontWeight: "bold",
-    marginTop: 16,
-    marginBottom: 8,
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: "hidden",
+    elevation: 4,
   },
 
-  row: {
+  cardHeader: {
+    backgroundColor: "#5A189A",
+    padding: 12,
+  },
+
+  cardHeaderRow: {
+    backgroundColor: "#5A189A",
+    padding: 12,
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
-    backgroundColor: "#eee",
-    borderRadius: 6,
-    marginBottom: 6,
-  },
-
-  total: {
-    fontWeight: "bold",
-    marginVertical: 16,
-    fontSize: 16,
-  },
-
-  buy: {
-    backgroundColor: "#7B2CBF",
-    padding: 12,
-    borderRadius: 8,
     alignItems: "center",
-    marginBottom: 8,
   },
 
-  cancel: {
-    backgroundColor: "#9D4EDD",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-
-  buttonText: {
+  cardTitle: {
     color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+
+  subText: {
+    color: "#E0AAFF",
+    fontSize: 12,
+  },
+
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+
+  filterText: {
+    color: "#2DC653",
+    fontSize: 12,
     fontWeight: "600",
   },
 
-  filter: {
-    textAlign: "center",
-    color: "#7B2CBF",
+  itemCard: {
+    flexDirection: "row",
+    backgroundColor: "#F4F4F4",
+    margin: 10,
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  itemImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    backgroundColor: "#DDD",
+  },
+
+  itemInfo: {
+    marginLeft: 12,
+  },
+
+  itemName: {
     fontWeight: "bold",
+    fontSize: 14,
+  },
+
+  itemText: {
+    fontSize: 12,
+    color: "#555",
+  },
+
+  itemPrice: {
+    marginTop: 4,
+    fontWeight: "bold",
+    fontSize: 13,
   },
 
   overlay: {
@@ -180,5 +257,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 12,
     fontWeight: "bold",
+    color: "#7B2CBF",
   },
 });
