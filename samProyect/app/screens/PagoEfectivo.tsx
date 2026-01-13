@@ -9,13 +9,13 @@ export default function PagoEfectivo() {
   const navigation = useNavigation<any>();
   const [importe, setImporte] = useState('');
 
-  // Fixed total for now (will come from Hall in the future)
-  const TOTAL = 1000; // <-- replace with prop or context when available
+  // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
+  const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   const handleAceptar = () => {
     const value = parseFloat(importe.replace(',', '.')) || 0;
     if (value >= TOTAL) {
-      navigation.navigate('Confirmacion');
+      navigation.navigate('Confirmacion.tsx');
     } else {
       Alert.alert('Pago insuficiente', 'No se puede procesar el pago: el importe es menor al total.');
     }
@@ -23,9 +23,9 @@ export default function PagoEfectivo() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.totalText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
+      <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
 
-      <Text style={styles.label}>Ingresa el importe</Text>
+      <Text style={styles.MainText}>Ingresa el importe</Text>
       <TextInput
         mode="outlined"
         style={styles.input}
@@ -38,16 +38,16 @@ export default function PagoEfectivo() {
 
       <View style={styles.buttons}>
         <View style={styles.button}>
-          <Button mode="contained" onPress={handleAceptar} buttonColor={customTheme.colors.primary}>
+          <Button mode="contained" onPress={handleAceptar} buttonColor={customTheme.colors.secondary}>
             Aceptar
           </Button>
         </View>
         <View style={styles.button}>
-          <Button mode="outlined" onPress={() => navigation.navigate('FormaPago')}>
+          <Button mode="contained" onPress={() => navigation.navigate('FormaPago') } buttonColor={customTheme.colors.secondary}>
             Volver
           </Button>
         </View>
-      </View>
+      </View> 
     </View>
   );
 }
@@ -59,28 +59,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: customTheme.colors.background,
   },
-  totalText: {
+  MainText: {
     fontSize: customTheme.fontSize.large,
     color: customTheme.colors.primary,
     fontWeight: 'bold',
     marginBottom: customTheme.spacing(2.5),
     textAlign: 'center',
   },
-  label: {
-    fontSize: customTheme.fontSize.normal,
-    color: customTheme.colors.textPrimary,
-    marginBottom: customTheme.spacing(1),
-  },
   input: {
     borderRadius: 6,
     marginBottom: customTheme.spacing(2.5),
   },
   buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
   },
   button: {
-    flex: 1,
-    marginHorizontal: customTheme.spacing(0.75),
+    width: '100%',
+    marginVertical: customTheme.spacing(0.75),
   },
 });
