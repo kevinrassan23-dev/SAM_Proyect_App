@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { useRouter } from "expo-router";
 import Menu from "../components/Menu";
 import theme from "../theme/Theme";
@@ -9,11 +9,15 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Menu />
+      <Menu />      
+
+      <Image
+        source={require("../../assets/images/sam_logo.png")}
+        style={styles.image}
+      />
 
       <Text style={styles.title}>Acceder</Text>
 
-      {/* BOTÓN A HALL */}
       <Pressable
         style={styles.button}
         onPress={() => router.push("/screens/Hall")}
@@ -31,21 +35,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: theme.colors.primary,
     marginBottom: 20,
   },
-
+  image: {
+    width: 500,        
+    height: 500,      
+    marginBottom: 20,
+    resizeMode: "contain",
+  },
   button: {
     backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
-
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
