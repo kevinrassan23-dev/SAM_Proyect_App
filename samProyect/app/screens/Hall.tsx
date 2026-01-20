@@ -18,15 +18,7 @@ interface Product {
   precio: number;
 }
 
-const receta: Product[] = [
-  {
-    id: "1",
-    nombre: "Medicamento A",
-    marca: "Marca X",
-    tipo: "Tabletas",
-    precio: 5.0,
-  },
-];
+const receta: Product[] = [];
 
 const categorias = [
   "Analgésicos",
@@ -40,16 +32,7 @@ const categorias = [
 
 export default function Hall() {
   const [showFilter, setShowFilter] = useState(false);
-
-  const [sinReceta, setSinReceta] = useState<Product[]>([
-    {
-      id: "2",
-      nombre: "Medicamento B",
-      marca: "Marca Y",
-      tipo: "Jarabe",
-      precio: 4.5,
-    },
-  ]);
+  const [sinReceta, setSinReceta] = useState<Product[]>([]);
 
   const handleAddCategoria = (categoria: string) => {
     const nuevoProducto: Product = {
@@ -64,6 +47,15 @@ export default function Hall() {
     setShowFilter(false);
   };
 
+  const handleRemoveProducto = (id: string) => {
+    setSinReceta((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const totalSinReceta = sinReceta.reduce(
+    (total, item) => total + item.precio,
+    0
+  );
+
   const renderItem = ({ item }: { item: Product }) => (
     <View style={styles.itemCard}>
       <Image
@@ -77,6 +69,10 @@ export default function Hall() {
         <Text style={styles.itemText}>{item.tipo}</Text>
         <Text style={styles.itemPrice}>{item.precio.toFixed(2)} €</Text>
       </View>
+
+      <Pressable onPress={() => handleRemoveProducto(item.id)}>
+        <MaterialIcons name="delete" size={22} color="#E63946" />
+      </Pressable>
     </View>
   );
 
@@ -113,6 +109,10 @@ export default function Hall() {
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
         />
+
+        <Text style={styles.totalText}>
+          Total: {totalSinReceta.toFixed(2)} €
+        </Text>
       </View>
 
       <Modal visible={showFilter} transparent animationType="slide">
@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
 
   itemInfo: {
     marginLeft: 12,
+    flex: 1,
   },
 
   itemName: {
@@ -225,6 +226,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: "bold",
     fontSize: 13,
+  },
+
+  totalText: {
+    textAlign: "right",
+    padding: 10,
+    fontWeight: "bold",
+    color: "#2DC653",
+    fontSize: 14,
   },
 
   overlay: {

@@ -16,13 +16,11 @@ export default function Home() {
         style={styles.image}
       />
 
-      <Text style={styles.title}>Acceder</Text>
-
       <Pressable
         style={styles.button}
         onPress={() => router.push("/screens/Hall")}
       >
-        <Text style={styles.buttonText}>Ir a Hall</Text>
+        <Text style={styles.buttonText}>ACCEDER</Text>
       </Pressable>
     </View>
   );
