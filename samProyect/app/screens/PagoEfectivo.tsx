@@ -1,12 +1,22 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { View, StyleSheet, Alert, Image, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import customTheme from '../theme/Theme';
 import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 export default function PagoEfectivo() {
-  const navigation = useNavigation<any>();
+
+const Aceptar = () => {
+  router.push({ pathname: "/screens/Confirmacion"});
+}
+
+const Volver = () => {
+  router.push({ pathname: "/screens/FormaPago"});
+}
+
+
   const [importe, setImporte] = useState('');
 
   // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
@@ -15,74 +25,49 @@ export default function PagoEfectivo() {
   const handleAceptar = () => {
     const value = parseFloat(importe.replace(',', '.')) || 0;
     if (value >= TOTAL) {
-      navigation.navigate('Confirmacion.tsx');
+      Aceptar();
     } else {
       Alert.alert('Pago insuficiente', 'No se puede procesar el pago: el importe es menor al total.');
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Contenedor del Logo - Posicionado arriba a la derecha */}
-      <View style={styles.logoContainer}>
-        <Image 
-          source={require('../../assets/images/sam logo.png')} 
-          style={styles.logo} 
-        />
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
 
-      {/* Contenedor del Contenido - Centrado en el espacio restante */}
-      <View style={styles.content}>
-        <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
+      <Text style={styles.MainText}>Ingresa el importe</Text>
+      <TextInput
+        mode="outlined"
+        style={styles.input}
+        keyboardType="numeric"
+        value={importe}
+        onChangeText={setImporte}
+        placeholder="0.00"
+        activeOutlineColor={customTheme.colors.primary}
+      />
 
-        <Text style={styles.MainText}>Ingresa el importe</Text>
-        <TextInput
-          mode="outlined"
-          style={styles.input}
-          keyboardType="numeric"
-          value={importe}
-          onChangeText={setImporte}
-          placeholder="0.00"
-          activeOutlineColor={customTheme.colors.primary}
-        />
-
-        <View style={styles.buttons}>
-          <View style={styles.button}>
-            <Button mode="contained" onPress={handleAceptar} buttonColor={customTheme.colors.secondary}>
-              Aceptar
-            </Button>
-          </View>
-          <View style={styles.button}>
-            <Button mode="contained" onPress={() => navigation.navigate('FormaPago.tsx') } buttonColor={customTheme.colors.secondary}>
-              Volver
-            </Button>
-          </View>
+      <View style={styles.buttons}>
+        <View style={styles.button}>
+          <Button mode="contained" onPress={handleAceptar} buttonColor={customTheme.colors.secondary}>
+            Aceptar
+          </Button>
         </View>
-      </View>
-    </SafeAreaView>
+        <View style={styles.button}>
+          <Button mode="contained" onPress={Volver} buttonColor={customTheme.colors.secondary}>
+            Volver
+          </Button>
+        </View>
+      </View> 
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: customTheme.colors.background,
-  },
-  logoContainer: {
-    alignItems: 'flex-end',
-    paddingHorizontal: customTheme.spacing(2.5),
-    paddingTop: customTheme.spacing(2),
-    width: '100%',
-  },
-  logo: {
-    width: 120,
-    height: 60,
-    resizeMode: 'contain',
-  },
-  content: {
+  container: {
     flex: 1,
     padding: customTheme.spacing(2.5),
     justifyContent: 'center',
+    backgroundColor: customTheme.colors.background,
   },
   MainText: {
     fontSize: customTheme.fontSize.large,
