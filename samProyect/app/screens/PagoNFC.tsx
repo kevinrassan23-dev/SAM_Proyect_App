@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { Text, Button } from 'react-native-paper';
 import customTheme from '../theme/Theme';
 import { useNavigation } from '@react-navigation/native';
@@ -27,64 +27,91 @@ export default function PagoNFC() {
   };
 
   return (
-    <View style={styles.container}>
-      {!pagoAceptado ? (
-        <>
-          <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
-          
-          <View style={styles.imagePlaceholder}>
-            {/* PLACEHOLDER PARA IMAGEN DE ESCANEO NFC */}
+    <SafeAreaView style={styles.safeArea}>
+      {/* Contenedor del Logo - Posicionado arriba a la derecha */}
+      <View style={styles.logoContainer}>
+        <Image 
+          source={require('../../assets/images/sam logo.png')} 
+          style={styles.logo} 
+        />
+      </View>
+
+      {/* Contenedor del Contenido - Centrado en el espacio restante */}
+      <View style={styles.content}>
+        {!pagoAceptado ? (
+          <>
+            <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
             
-            {<Image source={require('../../assets/images/nfc_scan.png')} style={styles.image} />}
-          </View>
-
-          <Text style={styles.instructionText}>Acerque su dispositivo al terminal para pagar</Text>
-
-          <View style={styles.buttons}>
-            <View style={styles.button}>
-              <Button 
-                mode="contained" 
-                onPress={handleEscanear} 
-                buttonColor={customTheme.colors.secondary}
-              >
-                Escanear
-              </Button>
+            <View style={styles.imagePlaceholder}>
+              {<Image source={require('../../assets/images/nfc_scan.png')} style={styles.image} />}
             </View>
-            <View style={styles.button}>
-              <Button 
-                mode="contained" 
-                onPress={() => navigation.navigate('FormaPago.tsx')} 
-                buttonColor={customTheme.colors.secondary}
-              >
-                Volver
-              </Button>
+
+            <Text style={styles.instructionText}>Acerque su dispositivo al terminal para pagar</Text>
+
+            <View style={styles.buttons}>
+              <View style={styles.button}>
+                <Button 
+                  mode="contained" 
+                  onPress={handleEscanear} 
+                  buttonColor={customTheme.colors.secondary}
+                >
+                  Escanear
+                </Button>
+              </View>
+              <View style={styles.button}>
+                <Button 
+                  mode="contained" 
+                  onPress={() => navigation.navigate('FormaPago.tsx')} 
+                  buttonColor={customTheme.colors.secondary}
+                >
+                  Volver
+                </Button>
+              </View>
             </View>
+          </>
+        ) : (
+          <View style={styles.successContainer}>
+            <View style={styles.imagePlaceholder}>
+              {<Image source={require('../../assets/images/payment_success.png')} style={styles.image} />}
+            </View>
+            <Text style={styles.successText}>¡Pago Aceptado!</Text>
+            <Text style={styles.redirectText}>Redirigiendo en unos segundos...</Text>
           </View>
-        </>
-      ) : (
-        <View style={styles.successContainer}>
-          <View style={styles.imagePlaceholder}>
-            {/* PLACEHOLDER PARA IMAGEN DE PAGO ACEPTADO */}
-            {<Image source={require('../../assets/images/payment_success.png')} style={styles.image} />}
-          </View>
-          <Text style={styles.successText}>¡Pago Aceptado!</Text>
-          <Text style={styles.redirectText}>Redirigiendo en unos segundos...</Text>
-        </View>
-      )}
-    </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: customTheme.colors.background,
+  },
+  logoContainer: {
+    alignItems: 'flex-end',
+    paddingHorizontal: customTheme.spacing(2.5),
+    paddingTop: customTheme.spacing(2),
+    width: '100%',
+  },
+  logo: {
+    width: 120,
+    height: 60,
+    resizeMode: 'contain',
+  },
+  content: {
     flex: 1,
     padding: customTheme.spacing(2.5),
     justifyContent: 'center',
-    backgroundColor: customTheme.colors.background,
   },
   successContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
   MainText: {
     fontSize: customTheme.fontSize.large,
@@ -128,11 +155,6 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 12,
     textAlign: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
   },
   buttons: {
     flexDirection: 'column',
