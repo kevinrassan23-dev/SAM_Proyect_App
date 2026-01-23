@@ -4,6 +4,7 @@ import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { Text, Button } from 'react-native-paper';
 import customTheme from '../theme/Theme';
 import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 export default function PagoNFC() {
   const navigation = useNavigation<any>();
@@ -16,7 +17,7 @@ export default function PagoNFC() {
     let timer: NodeJS.Timeout;
     if (pagoAceptado) {
       timer = setTimeout(() => {
-        navigation.navigate('Confirmacion.tsx');
+        router.push({ pathname: "/screens/Confirmacion" });
       }, 5000);
     }
     return () => clearTimeout(timer);
@@ -27,14 +28,7 @@ export default function PagoNFC() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Contenedor del Logo - Posicionado arriba a la derecha */}
-      <View style={styles.logoContainer}>
-        <Image 
-          source={require('../../assets/images/sam logo.png')} 
-          style={styles.logo} 
-        />
-      </View>
+    <View style={styles.container}>
 
       {/* Contenedor del Contenido - Centrado en el espacio restante */}
       <View style={styles.content}>
@@ -61,7 +55,7 @@ export default function PagoNFC() {
               <View style={styles.button}>
                 <Button 
                   mode="contained" 
-                  onPress={() => navigation.navigate('FormaPago.tsx')} 
+                  onPress={() => router.push({ pathname: "/screens/FormaPago"})} 
                   buttonColor={customTheme.colors.secondary}
                 >
                   Volver
@@ -79,13 +73,15 @@ export default function PagoNFC() {
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
+    padding: customTheme.spacing(2.5),
+    justifyContent: 'center',
     backgroundColor: customTheme.colors.background,
   },
   logoContainer: {
