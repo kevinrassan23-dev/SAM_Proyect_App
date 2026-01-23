@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { View, StyleSheet, Alert, Image, SafeAreaView } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import customTheme from '../theme/Theme';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 export default function PagoTarjeta() {
-  const navigation = useNavigation<any>();
   const [pin, setPin] = useState('');
 
   // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
@@ -14,7 +13,7 @@ export default function PagoTarjeta() {
 
   const handleAceptar = () => {
     if (pin.length === 4) {
-      navigation.navigate('Confirmacion.tsx');
+      router.push({ pathname: "/screens/Confirmacion" });
     } else {
       Alert.alert('PIN incompleto', 'Por favor, ingrese exactamente 4 dígitos.');
     }
@@ -29,14 +28,7 @@ export default function PagoTarjeta() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Contenedor del Logo - Posicionado arriba a la derecha */}
-      <View style={styles.logoContainer}>
-        <Image 
-          source={require('../../assets/images/sam logo.png')} 
-          style={styles.logo} 
-        />
-      </View>
+    <View style={styles.container}>
 
       {/* Contenedor del Contenido - Centrado en el espacio restante */}
       <View style={styles.content}>
@@ -69,7 +61,7 @@ export default function PagoTarjeta() {
           <View style={styles.button}>
             <Button 
               mode="contained" 
-              onPress={() => navigation.navigate('FormaPago.tsx')} 
+              onPress={() => router.push({ pathname: "/screens/FormaPago"})}
               buttonColor={customTheme.colors.secondary}
             >
               Volver
@@ -77,14 +69,15 @@ export default function PagoTarjeta() {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: customTheme.colors.background,
+    padding: customTheme.spacing(2.5),
+    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'flex-end',
