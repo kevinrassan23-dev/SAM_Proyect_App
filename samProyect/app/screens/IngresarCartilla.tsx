@@ -13,7 +13,7 @@ function IngresarCartilla() {
     };
 
     const aceptar = () => {
-        router.push("/screens/VerificacionMovil");
+        router.push("/screens/VerificacionChoice");
     };
 
     const cancelar = () => {

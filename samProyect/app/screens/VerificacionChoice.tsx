@@ -20,7 +20,7 @@ function VerificacionChoice() {
     return (
         <View style={styles.container}>
 
-            <Text style={styles.title}>¿COMO DESEA VERIFICARSE?</Text>
+            <Text style={styles.title}>¿CÓMO DESEA VERIFICARSE?</Text>
 
             <View style={{ flexDirection: 'column', gap: customTheme.spacing(2), justifyContent: "center", alignItems: "center", }}>
                 <Pressable style={styles.button} onPress={DNI}>

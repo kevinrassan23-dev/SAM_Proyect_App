@@ -14,14 +14,15 @@ export default function PagoNFC() {
   const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (pagoAceptado) {
-      timer = setTimeout(() => {
-        router.push({ pathname: "/screens/Confirmacion" });
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [pagoAceptado, navigation]);
+  if (!pagoAceptado) return;
+
+  const timer = setTimeout(() => {
+    router.push("/screens/Confirmacion");
+  }, 5000);
+
+  return () => 
+    clearTimeout(timer);
+  }, [pagoAceptado]);
 
   const handleEscanear = () => {
     setPagoAceptado(true);
@@ -37,7 +38,7 @@ export default function PagoNFC() {
             <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
             
             <View style={styles.imagePlaceholder}>
-              {<Image source={require('../../assets/images/nfc_scan.png')} style={styles.image} />}
+              {<Image source={require('../assets/images/nfc_scan.png')} style={styles.image} />}
             </View>
 
             <Text style={styles.instructionText}>Acerque su dispositivo al terminal para pagar</Text>
@@ -66,7 +67,7 @@ export default function PagoNFC() {
         ) : (
           <View style={styles.successContainer}>
             <View style={styles.imagePlaceholder}>
-              {<Image source={require('../../assets/images/payment_success.png')} style={styles.image} />}
+              {<Image source={require('../assets/images/payment_success.png')} style={styles.image} />}
             </View>
             <Text style={styles.successText}>¡Pago Aceptado!</Text>
             <Text style={styles.redirectText}>Redirigiendo en unos segundos...</Text>

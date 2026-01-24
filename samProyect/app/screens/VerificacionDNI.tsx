@@ -62,7 +62,7 @@ function VerificacionDNI() {
                 <Text style={styles.buttonText}>ACEPTAR</Text>
             </Pressable>
 
-            <Pressable style={styles.button} onPress={() => router.push("/screens/VerificacionMovil")}>
+            <Pressable style={styles.button} onPress={() => router.push("/screens/VerificacionChoice")}>
                 <Text style={styles.buttonText}>VOLVER</Text>
             </Pressable>
         </View>

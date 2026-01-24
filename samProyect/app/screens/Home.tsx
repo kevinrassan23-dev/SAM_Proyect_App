@@ -12,7 +12,7 @@ export default function Home() {
       <Menu />      
 
       <Image
-        source={require("../../assets/images/sam_logo.png")}
+        source={require('../assets/images/sam_logo.png')}
         style={styles.image}
       />
 
