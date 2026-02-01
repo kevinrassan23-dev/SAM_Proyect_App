@@ -7,6 +7,8 @@ import {
   FlatList,
   Modal,
   Image,
+  ScrollView,
+  TextInput,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -26,16 +28,6 @@ interface Product {
    DATA
 ======================= */
 const receta: Product[] = [];
-
-const categorias = [
-  "Analgésicos",
-  "Alérgenos",
-  "Gripe y resfriado",
-  "Dieta y nutrición",
-  "Cuidado del cabello y piel",
-  "Salud bucal",
-  "Primeros auxilios",
-];
 
 const medicamentosPorCategoria: Record<string, Product[]> = {
   Analgésicos: [
@@ -58,7 +50,7 @@ const medicamentosPorCategoria: Record<string, Product[]> = {
     { id: "g3", nombre: "Couldina", marca: "Bial", tipo: "Sobres", precio: 5.8 },
     { id: "g4", nombre: "Gripavick", marca: "Vick", tipo: "Jarabe", precio: 5.2 },
     { id: "g5", nombre: "Next", marca: "Next", tipo: "Cápsula", precio: 6.3 },
-  ],
+  ],  
   "Dieta y nutrición": [
     { id: "d1", nombre: "Multivitamínico", marca: "Centrum", tipo: "Tableta", precio: 7.5 },
     { id: "d2", nombre: "Omega 3", marca: "Solgar", tipo: "Cápsula", precio: 9.5 },
@@ -93,13 +85,20 @@ const medicamentosPorCategoria: Record<string, Product[]> = {
    COMPONENT
 ======================= */
 export default function Hall() {
-  const [showFilter, setShowFilter] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [sinReceta, setSinReceta] = useState<Product[]>([]);
-  const [categoriaSeleccionada, setCategoriaSeleccionada] =
-    useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const handleRemoveProducto = (id: string) => {
     setSinReceta((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const toggleCategory = (categoria: string) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoria]: !prev[categoria],
+    }));
   };
 
   const totalSinReceta = sinReceta.reduce(
@@ -109,17 +108,13 @@ export default function Hall() {
 
   const renderItem = ({ item }: { item: Product }) => (
     <View style={styles.itemCard}>
-      <Image
-        source={{ uri: "https://via.placeholder.com/70" }}
-        style={styles.itemImage}
-      />
+      <Image source={{ uri: "https://via.placeholder.com/70" }} style={styles.itemImage} />
       <View style={styles.itemInfo}>
         <Text style={styles.itemName}>{item.nombre}</Text>
         <Text style={styles.itemText}>{item.marca}</Text>
         <Text style={styles.itemText}>{item.tipo}</Text>
         <Text style={styles.itemPrice}>{item.precio.toFixed(2)} €</Text>
       </View>
-
       <Pressable onPress={() => handleRemoveProducto(item.id)}>
         <MaterialIcons name="delete" size={22} color="#E63946" />
       </Pressable>
@@ -128,7 +123,7 @@ export default function Hall() {
 
   return (
     <View style={styles.container}>
-      {/* BOTÓN CANCELAR */}
+      {/* CANCELAR */}
       <Pressable
         style={styles.cancelButtonScreen}
         onPress={() => router.replace("/screens/Home")}
@@ -149,65 +144,73 @@ export default function Hall() {
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
           <Text style={styles.cardTitle}>SIN RECETA</Text>
-          <Pressable
-            style={styles.filterButton}
-            onPress={() => setShowFilter(true)}
-          >
+          <Pressable style={styles.filterButton} onPress={() => setShowDrawer(true)}>
             <MaterialIcons name="filter-list" size={18} color="#2DC653" />
             <Text style={styles.filterText}>Filtrar medicamentos</Text>
           </Pressable>
         </View>
 
         <FlatList data={sinReceta} renderItem={renderItem} />
-
-        <Text style={styles.totalText}>
-          Total: {totalSinReceta.toFixed(2)} €
-        </Text>
+        <Text style={styles.totalText}>Total: {totalSinReceta.toFixed(2)} €</Text>
       </View>
 
-      {/* MODAL */}
-      <Modal visible={showFilter} transparent animationType="slide">
-        <Pressable
-          style={styles.overlay}
-          onPress={() => {
-            setShowFilter(false);
-            setCategoriaSeleccionada(null);
-          }}
-        >
+      {/* DRAWER */}
+      <Modal visible={showDrawer} transparent animationType="slide">
+        <Pressable style={styles.overlay} onPress={() => setShowDrawer(false)}>
           <Pressable style={styles.drawer}>
-            <Text style={styles.drawerTitle}>
-              {categoriaSeleccionada ?? "FILTRAR MEDICAMENTOS"}
-            </Text>
+            {/* BUSCADOR */}
+            <TextInput
+              placeholder="Buscar medicamento..."
+              value={search}
+              onChangeText={setSearch}
+              style={styles.searchInput}
+            />
 
-            {categoriaSeleccionada
-              ? medicamentosPorCategoria[categoriaSeleccionada].map((med) => (
-                  <Pressable
-                    key={med.id}
-                    style={styles.drawerItem}
-                    onPress={() => {
-                      setSinReceta((prev) => [...prev, med]);
-                      setCategoriaSeleccionada(null);
-                      setShowFilter(false);
-                    }}
-                  >
-                    <Text>{med.nombre}</Text>
-                  </Pressable>
-                ))
-              : categorias.map((cat) => (
-                  <Pressable
-                    key={cat}
-                    style={styles.drawerItem}
-                    onPress={() => setCategoriaSeleccionada(cat)}
-                  >
-                    <Text>{cat}</Text>
-                  </Pressable>
-                ))}
+            <ScrollView>
+              {Object.entries(medicamentosPorCategoria).map(([categoria, meds]) => {
+                // Filtrar por búsqueda
+                const filtrados = meds.filter((m) =>
+                  m.nombre.toLowerCase().includes(search.toLowerCase())
+                );
 
-            {categoriaSeleccionada && (
-              <Pressable onPress={() => setCategoriaSeleccionada(null)}>
-                <Text style={styles.close}>← Volver</Text>
-              </Pressable>
-            )}
+                if (filtrados.length === 0) return null;
+
+                const isExpanded = expandedCategories[categoria];
+
+                return (
+                  <View key={categoria}>
+                    {/* CATEGORIA */}
+                    <Pressable
+                      onPress={() => toggleCategory(categoria)}
+                      style={styles.drawerCategoryButton}
+                    >
+                      <Text style={styles.drawerCategory}>{categoria}</Text>
+                      <MaterialIcons
+                        name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                        size={20}
+                        color="#5A189A"
+                      />
+                    </Pressable>
+
+                    {/* MEDICAMENTOS EXPANDIDOS */}
+                    {isExpanded &&
+                      filtrados.map((med) => (
+                        <Pressable
+                          key={med.id}
+                          style={styles.drawerItem}
+                          onPress={() => {
+                            setSinReceta((prev) => [...prev, med]);
+                            setShowDrawer(false);
+                            setSearch("");
+                          }}
+                        >
+                          <Text>{med.nombre}</Text>
+                        </Pressable>
+                      ))}
+                  </View>
+                );
+              })}
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -246,25 +249,43 @@ const styles = StyleSheet.create({
   itemText: { fontSize: 12, color: "#555" },
   itemPrice: { fontWeight: "bold" },
   totalText: { textAlign: "right", padding: 10, fontWeight: "bold", color: "#2DC653" },
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
+  overlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.3)" },
   drawer: {
     backgroundColor: "#fff",
     padding: 16,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    maxHeight: "80%",
   },
-  drawerTitle: { fontWeight: "bold", marginBottom: 12, textAlign: "center" },
-  drawerItem: {
-    padding: 10,
+  drawerCategoryButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 4,
     backgroundColor: "#eee",
     borderRadius: 6,
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  close: { textAlign: "center", marginTop: 12, fontWeight: "bold", color: "#7B2CBF" },
+  drawerCategory: {
+    fontWeight: "bold",
+    color: "#5A189A",
+  },
+  drawerItem: {
+    padding: 10,
+    backgroundColor: "#ddd",
+    borderRadius: 6,
+    marginBottom: 6,
+    marginLeft: 12,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 12,
+  },
   cancelButtonScreen: {
     marginBottom: 12,
     padding: 12,
@@ -274,3 +295,5 @@ const styles = StyleSheet.create({
   },
   cancelTextScreen: { color: "#fff", fontWeight: "bold" },
 });
+
+
