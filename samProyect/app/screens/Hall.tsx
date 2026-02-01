@@ -9,6 +9,7 @@ import {
   Image,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 /* =======================
    INTERFACE
@@ -91,7 +92,7 @@ const medicamentosPorCategoria: Record<string, Product[]> = {
 /* =======================
    COMPONENT
 ======================= */
-export default function Hall({ navigation }: { navigation: any }) {
+export default function Hall() {
   const [showFilter, setShowFilter] = useState(false);
   const [sinReceta, setSinReceta] = useState<Product[]>([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] =
@@ -127,10 +128,10 @@ export default function Hall({ navigation }: { navigation: any }) {
 
   return (
     <View style={styles.container}>
-      {/* BOTÓN CANCELAR PRINCIPAL */}
+      {/* BOTÓN CANCELAR */}
       <Pressable
         style={styles.cancelButtonScreen}
-        onPress={() => navigation.navigate("Home")}
+        onPress={() => router.replace("/screens/Home")}
       >
         <Text style={styles.cancelTextScreen}>Cancelar</Text>
       </Pressable>
@@ -164,7 +165,7 @@ export default function Hall({ navigation }: { navigation: any }) {
         </Text>
       </View>
 
-      {/* DRAWER MODAL */}
+      {/* MODAL */}
       <Modal visible={showFilter} transparent animationType="slide">
         <Pressable
           style={styles.overlay}
@@ -273,4 +274,3 @@ const styles = StyleSheet.create({
   },
   cancelTextScreen: { color: "#fff", fontWeight: "bold" },
 });
-
