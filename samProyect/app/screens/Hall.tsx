@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
+/* =======================
+   INTERFACE
+======================= */
 interface Product {
   id: string;
   nombre: string;
@@ -18,6 +21,9 @@ interface Product {
   precio: number;
 }
 
+/* =======================
+   DATA
+======================= */
 const receta: Product[] = [];
 
 const categorias = [
@@ -25,27 +31,71 @@ const categorias = [
   "Alérgenos",
   "Gripe y resfriado",
   "Dieta y nutrición",
-  "Cuidado de cabello y piel",
+  "Cuidado del cabello y piel",
   "Salud bucal",
   "Primeros auxilios",
 ];
 
-export default function Hall() {
+const medicamentosPorCategoria: Record<string, Product[]> = {
+  Analgésicos: [
+    { id: "a1", nombre: "Ibudol", marca: "Genérico", tipo: "Cápsula", precio: 3.5 },
+    { id: "a2", nombre: "Dolostop", marca: "Bayer", tipo: "Tableta", precio: 4.0 },
+    { id: "a3", nombre: "Actron", marca: "Actron", tipo: "Cápsula", precio: 4.8 },
+    { id: "a4", nombre: "Voltadol Forte", marca: "GSK", tipo: "Gel", precio: 6.2 },
+    { id: "a5", nombre: "Epididol", marca: "Grünenthal", tipo: "Tableta", precio: 5.0 },
+  ],
+  Alérgenos: [
+    { id: "al1", nombre: "Loratadina", marca: "MK", tipo: "Tableta", precio: 3.0 },
+    { id: "al2", nombre: "Cetirizina", marca: "Bayer", tipo: "Tableta", precio: 3.8 },
+    { id: "al3", nombre: "Desloratadina", marca: "Normon", tipo: "Tableta", precio: 4.2 },
+    { id: "al4", nombre: "Fexofenadina", marca: "Teva", tipo: "Tableta", precio: 4.5 },
+    { id: "al5", nombre: "Clorfenamina", marca: "Genérico", tipo: "Jarabe", precio: 2.8 },
+  ],
+  "Gripe y resfriado": [
+    { id: "g1", nombre: "Frenadol", marca: "Bayer", tipo: "Sobres", precio: 6.0 },
+    { id: "g2", nombre: "Vick Jarabe", marca: "Vick", tipo: "Jarabe", precio: 5.5 },
+    { id: "g3", nombre: "Couldina", marca: "Bial", tipo: "Sobres", precio: 5.8 },
+    { id: "g4", nombre: "Gripavick", marca: "Vick", tipo: "Jarabe", precio: 5.2 },
+    { id: "g5", nombre: "Next", marca: "Next", tipo: "Cápsula", precio: 6.3 },
+  ],
+  "Dieta y nutrición": [
+    { id: "d1", nombre: "Multivitamínico", marca: "Centrum", tipo: "Tableta", precio: 7.5 },
+    { id: "d2", nombre: "Omega 3", marca: "Solgar", tipo: "Cápsula", precio: 9.5 },
+    { id: "d3", nombre: "Vitamina C", marca: "Redoxon", tipo: "Efervescente", precio: 6.5 },
+    { id: "d4", nombre: "Colágeno", marca: "AML", tipo: "Polvo", precio: 10.0 },
+    { id: "d5", nombre: "Magnesio", marca: "Ana María", tipo: "Tableta", precio: 8.0 },
+  ],
+  "Cuidado del cabello y piel": [
+    { id: "c1", nombre: "Champú Anticaspa", marca: "H&S", tipo: "Líquido", precio: 6.5 },
+    { id: "c2", nombre: "Crema Hidratante", marca: "Nivea", tipo: "Crema", precio: 4.2 },
+    { id: "c3", nombre: "Protector Solar", marca: "Isdin", tipo: "Crema", precio: 12.0 },
+    { id: "c4", nombre: "Aloe Vera", marca: "Babaria", tipo: "Gel", precio: 5.0 },
+    { id: "c5", nombre: "Aceite Capilar", marca: "Pantene", tipo: "Aceite", precio: 6.8 },
+  ],
+  "Salud bucal": [
+    { id: "s1", nombre: "Pasta Dental", marca: "Colgate", tipo: "Crema", precio: 3.0 },
+    { id: "s2", nombre: "Enjuague Bucal", marca: "Listerine", tipo: "Líquido", precio: 4.8 },
+    { id: "s3", nombre: "Hilo Dental", marca: "Oral-B", tipo: "Rollo", precio: 2.5 },
+    { id: "s4", nombre: "Cepillo Dental", marca: "Oral-B", tipo: "Manual", precio: 3.2 },
+    { id: "s5", nombre: "Blanqueador Dental", marca: "Vitis", tipo: "Gel", precio: 7.0 },
+  ],
+  "Primeros auxilios": [
+    { id: "p1", nombre: "Agua Oxigenada", marca: "Genérico", tipo: "Líquido", precio: 2.0 },
+    { id: "p2", nombre: "Alcohol 70%", marca: "Acofar", tipo: "Líquido", precio: 2.8 },
+    { id: "p3", nombre: "Vendas", marca: "Hansaplast", tipo: "Pack", precio: 3.5 },
+    { id: "p4", nombre: "Tiritas", marca: "Hansaplast", tipo: "Pack", precio: 3.0 },
+    { id: "p5", nombre: "Suero Fisiológico", marca: "Monodosis", tipo: "Ampolla", precio: 4.0 },
+  ],
+};
+
+/* =======================
+   COMPONENT
+======================= */
+export default function Hall({ navigation }: { navigation: any }) {
   const [showFilter, setShowFilter] = useState(false);
   const [sinReceta, setSinReceta] = useState<Product[]>([]);
-
-  const handleAddCategoria = (categoria: string) => {
-    const nuevoProducto: Product = {
-      id: Date.now().toString(),
-      nombre: categoria,
-      marca: "Marca Y",
-      tipo: "Jarabe",
-      precio: 4.5,
-    };
-
-    setSinReceta((prev) => [...prev, nuevoProducto]);
-    setShowFilter(false);
-  };
+  const [categoriaSeleccionada, setCategoriaSeleccionada] =
+    useState<string | null>(null);
 
   const handleRemoveProducto = (id: string) => {
     setSinReceta((prev) => prev.filter((item) => item.id !== id));
@@ -62,7 +112,6 @@ export default function Hall() {
         source={{ uri: "https://via.placeholder.com/70" }}
         style={styles.itemImage}
       />
-
       <View style={styles.itemInfo}>
         <Text style={styles.itemName}>{item.nombre}</Text>
         <Text style={styles.itemText}>{item.marca}</Text>
@@ -78,23 +127,27 @@ export default function Hall() {
 
   return (
     <View style={styles.container}>
+      {/* BOTÓN CANCELAR PRINCIPAL */}
+      <Pressable
+        style={styles.cancelButtonScreen}
+        onPress={() => navigation.navigate("Home")}
+      >
+        <Text style={styles.cancelTextScreen}>Cancelar</Text>
+      </Pressable>
+
+      {/* CON RECETA */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>CON RECETA</Text>
           <Text style={styles.subText}>¿Tienes receta?</Text>
         </View>
-
-        <FlatList
-          data={receta}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
+        <FlatList data={receta} renderItem={renderItem} />
       </View>
 
+      {/* SIN RECETA */}
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
           <Text style={styles.cardTitle}>SIN RECETA</Text>
-
           <Pressable
             style={styles.filterButton}
             onPress={() => setShowFilter(true)}
@@ -104,93 +157,80 @@ export default function Hall() {
           </Pressable>
         </View>
 
-        <FlatList
-          data={sinReceta}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
+        <FlatList data={sinReceta} renderItem={renderItem} />
 
         <Text style={styles.totalText}>
           Total: {totalSinReceta.toFixed(2)} €
         </Text>
       </View>
 
+      {/* DRAWER MODAL */}
       <Modal visible={showFilter} transparent animationType="slide">
-        <View style={styles.overlay}>
-          <View style={styles.drawer}>
-            <Text style={styles.drawerTitle}>FILTRAR MEDICAMENTOS</Text>
+        <Pressable
+          style={styles.overlay}
+          onPress={() => {
+            setShowFilter(false);
+            setCategoriaSeleccionada(null);
+          }}
+        >
+          <Pressable style={styles.drawer}>
+            <Text style={styles.drawerTitle}>
+              {categoriaSeleccionada ?? "FILTRAR MEDICAMENTOS"}
+            </Text>
 
-            {categorias.map((cat) => (
-              <Pressable
-                key={cat}
-                style={styles.drawerItem}
-                onPress={() => handleAddCategoria(cat)}
-              >
-                <Text>{cat}</Text>
+            {categoriaSeleccionada
+              ? medicamentosPorCategoria[categoriaSeleccionada].map((med) => (
+                  <Pressable
+                    key={med.id}
+                    style={styles.drawerItem}
+                    onPress={() => {
+                      setSinReceta((prev) => [...prev, med]);
+                      setCategoriaSeleccionada(null);
+                      setShowFilter(false);
+                    }}
+                  >
+                    <Text>{med.nombre}</Text>
+                  </Pressable>
+                ))
+              : categorias.map((cat) => (
+                  <Pressable
+                    key={cat}
+                    style={styles.drawerItem}
+                    onPress={() => setCategoriaSeleccionada(cat)}
+                  >
+                    <Text>{cat}</Text>
+                  </Pressable>
+                ))}
+
+            {categoriaSeleccionada && (
+              <Pressable onPress={() => setCategoriaSeleccionada(null)}>
+                <Text style={styles.close}>← Volver</Text>
               </Pressable>
-            ))}
-
-            <Pressable onPress={() => setShowFilter(false)}>
-              <Text style={styles.close}>Cerrar</Text>
-            </Pressable>
-          </View>
-        </View>
+            )}
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
 }
 
+/* =======================
+   STYLES
+======================= */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: "hidden",
-    elevation: 4,
-  },
-
-  cardHeader: {
-    backgroundColor: "#5A189A",
-    padding: 12,
-  },
-
+  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  card: { backgroundColor: "#fff", borderRadius: 12, marginBottom: 16, elevation: 4 },
+  cardHeader: { backgroundColor: "#5A189A", padding: 12 },
   cardHeaderRow: {
     backgroundColor: "#5A189A",
     padding: 12,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
   },
-
-  cardTitle: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-
-  subText: {
-    color: "#E0AAFF",
-    fontSize: 12,
-  },
-
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-
-  filterText: {
-    color: "#2DC653",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
+  cardTitle: { color: "#fff", fontWeight: "bold" },
+  subText: { color: "#E0AAFF", fontSize: 12 },
+  filterButton: { flexDirection: "row", alignItems: "center", gap: 4 },
+  filterText: { color: "#2DC653", fontWeight: "600" },
   itemCard: {
     flexDirection: "row",
     backgroundColor: "#F4F4F4",
@@ -199,73 +239,38 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-
-  itemImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    backgroundColor: "#DDD",
-  },
-
-  itemInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-
-  itemName: {
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-
-  itemText: {
-    fontSize: 12,
-    color: "#555",
-  },
-
-  itemPrice: {
-    marginTop: 4,
-    fontWeight: "bold",
-    fontSize: 13,
-  },
-
-  totalText: {
-    textAlign: "right",
-    padding: 10,
-    fontWeight: "bold",
-    color: "#2DC653",
-    fontSize: 14,
-  },
-
+  itemImage: { width: 70, height: 70, borderRadius: 8 },
+  itemInfo: { marginLeft: 12, flex: 1 },
+  itemName: { fontWeight: "bold" },
+  itemText: { fontSize: 12, color: "#555" },
+  itemPrice: { fontWeight: "bold" },
+  totalText: { textAlign: "right", padding: 10, fontWeight: "bold", color: "#2DC653" },
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0,0,0,0.3)",
   },
-
   drawer: {
     backgroundColor: "#fff",
     padding: 16,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-
-  drawerTitle: {
-    fontWeight: "bold",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-
+  drawerTitle: { fontWeight: "bold", marginBottom: 12, textAlign: "center" },
   drawerItem: {
     padding: 10,
     backgroundColor: "#eee",
     borderRadius: 6,
     marginBottom: 8,
   },
-
-  close: {
-    textAlign: "center",
-    marginTop: 12,
-    fontWeight: "bold",
-    color: "#7B2CBF",
+  close: { textAlign: "center", marginTop: 12, fontWeight: "bold", color: "#7B2CBF" },
+  cancelButtonScreen: {
+    marginBottom: 12,
+    padding: 12,
+    backgroundColor: "#E63946",
+    borderRadius: 8,
+    alignItems: "center",
   },
+  cancelTextScreen: { color: "#fff", fontWeight: "bold" },
 });
+
