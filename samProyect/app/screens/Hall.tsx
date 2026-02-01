@@ -50,7 +50,7 @@ const medicamentosPorCategoria: Record<string, Product[]> = {
     { id: "g3", nombre: "Couldina", marca: "Bial", tipo: "Sobres", precio: 5.8 },
     { id: "g4", nombre: "Gripavick", marca: "Vick", tipo: "Jarabe", precio: 5.2 },
     { id: "g5", nombre: "Next", marca: "Next", tipo: "Cápsula", precio: 6.3 },
-  ],  
+  ],
   "Dieta y nutrición": [
     { id: "d1", nombre: "Multivitamínico", marca: "Centrum", tipo: "Tableta", precio: 7.5 },
     { id: "d2", nombre: "Omega 3", marca: "Solgar", tipo: "Cápsula", precio: 9.5 },
@@ -123,36 +123,38 @@ export default function Hall() {
 
   return (
     <View style={styles.container}>
-      {/* CANCELAR */}
-      <Pressable
-        style={styles.cancelButtonScreen}
-        onPress={() => router.replace("/screens/Home")}
-      >
-        <Text style={styles.cancelTextScreen}>Cancelar</Text>
-      </Pressable>
-
-      {/* CON RECETA */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>CON RECETA</Text>
-          <Text style={styles.subText}>¿Tienes receta?</Text>
-        </View>
-        <FlatList data={receta} renderItem={renderItem} />
-      </View>
-
-      {/* SIN RECETA */}
-      <View style={styles.card}>
-        <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardTitle}>SIN RECETA</Text>
-          <Pressable style={styles.filterButton} onPress={() => setShowDrawer(true)}>
-            <MaterialIcons name="filter-list" size={18} color="#2DC653" />
-            <Text style={styles.filterText}>Filtrar medicamentos</Text>
-          </Pressable>
+      <ScrollView>
+        {/* CON RECETA */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>CON RECETA</Text>
+            <Text style={styles.subText}>¿Tienes receta?</Text>
+          </View>
+          <FlatList data={receta} renderItem={renderItem} />
         </View>
 
-        <FlatList data={sinReceta} renderItem={renderItem} />
-        <Text style={styles.totalText}>Total: {totalSinReceta.toFixed(2)} €</Text>
-      </View>
+        {/* SIN RECETA */}
+        <View style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardTitle}>SIN RECETA</Text>
+            <Pressable style={styles.filterButton} onPress={() => setShowDrawer(true)}>
+              <MaterialIcons name="filter-list" size={18} color="#2DC653" />
+              <Text style={styles.filterText}>Filtrar medicamentos</Text>
+            </Pressable>
+          </View>
+
+          <FlatList data={sinReceta} renderItem={renderItem} />
+          <Text style={styles.totalText}>Total: {totalSinReceta.toFixed(2)} €</Text>
+        </View>
+
+        {/* BOTÓN CANCELAR ABAJO */}
+        <Pressable
+          style={styles.cancelButtonScreen}
+          onPress={() => router.replace("/screens/Home")}
+        >
+          <Text style={styles.cancelTextScreen}>Cancelar</Text>
+        </Pressable>
+      </ScrollView>
 
       {/* DRAWER */}
       <Modal visible={showDrawer} transparent animationType="slide">
@@ -168,11 +170,9 @@ export default function Hall() {
 
             <ScrollView>
               {Object.entries(medicamentosPorCategoria).map(([categoria, meds]) => {
-                // Filtrar por búsqueda
                 const filtrados = meds.filter((m) =>
                   m.nombre.toLowerCase().includes(search.toLowerCase())
                 );
-
                 if (filtrados.length === 0) return null;
 
                 const isExpanded = expandedCategories[categoria];
@@ -222,7 +222,7 @@ export default function Hall() {
    STYLES
 ======================= */
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 12, backgroundColor: "#fff" },
   card: { backgroundColor: "#fff", borderRadius: 12, marginBottom: 16, elevation: 4 },
   cardHeader: { backgroundColor: "#5A189A", padding: 12 },
   cardHeaderRow: {
@@ -252,10 +252,10 @@ const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.3)" },
   drawer: {
     backgroundColor: "#fff",
-    padding: 16,
+    padding: 12,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    maxHeight: "80%",
+    maxHeight: "70%", // más pequeño
   },
   drawerCategoryButton: {
     flexDirection: "row",
@@ -287,13 +287,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cancelButtonScreen: {
-    marginBottom: 12,
-    padding: 12,
+    marginVertical: 12,
+    padding: 10, // más pequeño
     backgroundColor: "#E63946",
     borderRadius: 8,
     alignItems: "center",
   },
-  cancelTextScreen: { color: "#fff", fontWeight: "bold" },
+  cancelTextScreen: { color: "#fff", fontWeight: "bold", fontSize: 14 },
 });
-
 
