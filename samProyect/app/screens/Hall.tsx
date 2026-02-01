@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    maxHeight: "70%", // más pequeño
+    maxHeight: "70%",
   },
   drawerCategoryButton: {
     flexDirection: "row",
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonScreen: {
     marginVertical: 12,
-    padding: 10, // más pequeño
+    padding: 10,
     backgroundColor: "#E63946",
     borderRadius: 8,
     alignItems: "center",
