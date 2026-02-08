@@ -12,10 +12,10 @@ const customTheme = {
         textSecondary: "#ffffffff",
 
         // Estado de mensajes
-        error: "#ff2b1c",           
+        error: "#d82215",           
         warning: "#e4dd00ff",          
         info: "#eb8d00ff",            
-        success: "#2196f3",          
+        success: "#208be2",          
     },
 
     // Tamaños de fuente

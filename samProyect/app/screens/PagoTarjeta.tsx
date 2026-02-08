@@ -1,15 +1,20 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { View, StyleSheet, Alert, Image, SafeAreaView } from 'react-native';
+import { View, Alert, Pressable } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
-import customTheme from '../theme/Theme';
 import { router } from 'expo-router';
 
-export default function PagoTarjeta() {
+import { styles } from "../../styles/PagoTarjetaStyle";
+
+function PagoTarjeta() {
   const [pin, setPin] = useState('');
 
   // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
   const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
+
+  const Volver = () => {
+    router.push({ pathname: "/screens/FormaPago"});
+  }
 
   const handleAceptar = () => {
     if (pin.length === 4) {
@@ -27,93 +32,36 @@ export default function PagoTarjeta() {
     }
   };
 
-  return (
-    <View style={styles.container}>
+return (
+  <View style={styles.container}>
+    <Text style={styles.MainText}>
+      Total a pagar: ${TOTAL.toFixed(2)}
+    </Text>
 
-      {/* Contenedor del Contenido - Centrado en el espacio restante */}
-      <View style={styles.content}>
-        <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
+    <Text style={styles.MainText}>
+      Ingrese el PIN de su tarjeta
+    </Text>
 
-        <Text style={styles.MainText}>Ingrese el PIN de su tarjeta</Text>
-        
-        <TextInput
-          mode="outlined"
-          style={styles.input}
-          keyboardType="numeric"
-          secureTextEntry={true}
-          value={pin}
-          onChangeText={handlePinChange}
-          placeholder="...."
-          placeholderTextColor="#ccc"
-          activeOutlineColor={customTheme.colors.primary}
-        />
+    <TextInput
+      mode="outlined"
+      style={styles.input}
+      keyboardType="numeric"
+      secureTextEntry
+      value={pin}
+      onChangeText={handlePinChange}
+      placeholder="Ej: 1234"
+      activeOutlineColor={styles.Outline.color}
+    />
 
-        <View style={styles.buttons}>
-          <View style={styles.button}>
-            <Button 
-              mode="contained" 
-              onPress={handleAceptar} 
-              buttonColor={customTheme.colors.secondary}
-            >
-              Aceptar
-            </Button>
-          </View>
-          <View style={styles.button}>
-            <Button 
-              mode="contained" 
-              onPress={() => router.push({ pathname: "/screens/FormaPago"})}
-              buttonColor={customTheme.colors.secondary}
-            >
-              Volver
-            </Button>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
+    <Pressable style={styles.button} onPress={handleAceptar}>
+      <Text style={styles.buttonText}>ACEPTAR</Text>
+    </Pressable>
+
+    <Pressable style={styles.button} onPress={Volver}>
+      <Text style={styles.buttonText}>VOLVER</Text>
+    </Pressable>
+  </View>
+);
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: customTheme.spacing(2.5),
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'flex-end',
-    paddingHorizontal: customTheme.spacing(2.5),
-    paddingTop: customTheme.spacing(2),
-    width: '100%',
-  },
-  logo: {
-    width: 120,
-    height: 60,
-    resizeMode: 'contain',
-  },
-  content: {
-    flex: 1,
-    padding: customTheme.spacing(2.5),
-    justifyContent: 'center',
-  },
-  MainText: {
-    fontSize: customTheme.fontSize.large,
-    color: customTheme.colors.primary,
-    fontWeight: 'bold',
-    marginBottom: customTheme.spacing(2.5),
-    textAlign: 'center',
-  },
-  input: {
-    borderRadius: 6,
-    marginBottom: customTheme.spacing(2.5),
-    textAlign: 'center',
-  },
-  buttons: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'stretch',
-  },
-  button: {
-    width: '100%',
-    marginVertical: customTheme.spacing(0.75),
-  },
-});
+export default PagoTarjeta;

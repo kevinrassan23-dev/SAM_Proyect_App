@@ -2,11 +2,12 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { Text, Button } from 'react-native-paper';
-import customTheme from '../theme/Theme';
+import customTheme from '../../theme/Theme';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
+import { styles } from "../../styles/PagoNFCStyle";
 
-export default function PagoNFC() {
+function PagoNFC() {
   const navigation = useNavigation<any>();
   const [pagoAceptado, setPagoAceptado] = useState(false);
 
@@ -14,7 +15,10 @@ export default function PagoNFC() {
   const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+
+    // CUIDADO CON ESTO
+    let timer: ReturnType<typeof setTimeout>;
+
     if (pagoAceptado) {
       timer = setTimeout(() => {
         router.push({ pathname: "/screens/Confirmacion" });
@@ -49,7 +53,7 @@ export default function PagoNFC() {
                   onPress={handleEscanear} 
                   buttonColor={customTheme.colors.secondary}
                 >
-                  Escanear
+                  ESCANEAR
                 </Button>
               </View>
               <View style={styles.button}>
@@ -58,7 +62,7 @@ export default function PagoNFC() {
                   onPress={() => router.push({ pathname: "/screens/FormaPago"})} 
                   buttonColor={customTheme.colors.secondary}
                 >
-                  Volver
+                  VOLVER
                 </Button>
               </View>
             </View>
@@ -77,88 +81,4 @@ export default function PagoNFC() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: customTheme.spacing(2.5),
-    justifyContent: 'center',
-    backgroundColor: customTheme.colors.background,
-  },
-  logoContainer: {
-    alignItems: 'flex-end',
-    paddingHorizontal: customTheme.spacing(2.5),
-    paddingTop: customTheme.spacing(2),
-    width: '100%',
-  },
-  logo: {
-    width: 120,
-    height: 60,
-    resizeMode: 'contain',
-  },
-  content: {
-    flex: 1,
-    padding: customTheme.spacing(2.5),
-    justifyContent: 'center',
-  },
-  successContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-  MainText: {
-    fontSize: customTheme.fontSize.large,
-    color: customTheme.colors.primary,
-    fontWeight: 'bold',
-    marginBottom: customTheme.spacing(4),
-    textAlign: 'center',
-  },
-  instructionText: {
-    fontSize: customTheme.fontSize.normal,
-    color: customTheme.colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: customTheme.spacing(4),
-  },
-  successText: {
-    fontSize: customTheme.fontSize.title,
-    color: customTheme.colors.primary,
-    fontWeight: 'bold',
-    marginTop: customTheme.spacing(2),
-    textAlign: 'center',
-  },
-  redirectText: {
-    fontSize: customTheme.fontSize.small,
-    color: '#666',
-    marginTop: customTheme.spacing(1),
-    textAlign: 'center',
-  },
-  imagePlaceholder: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginBottom: customTheme.spacing(4),
-    borderColor: customTheme.colors.primary,
-    borderStyle: 'dashed',
-  },
-  placeholderText: {
-    color: '#999',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  buttons: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'stretch',
-  },
-  button: {
-    width: '100%',
-    marginVertical: customTheme.spacing(0.75),
-  },
-});
+export default PagoNFC;

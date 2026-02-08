@@ -1,15 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import { useRouter } from "expo-router";
-import Menu from "../components/Menu";
-import theme from "../theme/Theme";
+import { styles } from "../../styles/HomeStyle";
 
-export default function Home() {
+function Home() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <Menu />      
 
       <Image
         source={require("../../assets/images/sam_logo.png")}
@@ -25,35 +23,4 @@ export default function Home() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: theme.colors.primary,
-    marginBottom: 20,
-  },
-  image: {
-    width: 500,        
-    height: 500,      
-    marginBottom: 20,
-    resizeMode: "contain",
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+export default Home;

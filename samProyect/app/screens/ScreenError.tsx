@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, Button, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import customTheme from "../theme/Theme";
 import LottieView from "lottie-react-native";
+import { styles } from "../../styles/ScreenErrorStyle";
 
 function ScreenError() {
     const { codigo, mensaje, reference } = useLocalSearchParams();
@@ -38,7 +38,7 @@ function ScreenError() {
         }
     };
 
-    const getAnimationError = () => require("../assets/lottie/ErrorIcon.json");
+    const getAnimationError = () => require("../../assets/lottie/ErrorIcon.json");
 
     return(
         <View style={styles.container}>
@@ -59,7 +59,7 @@ function ScreenError() {
 
             {/* Referencia para soporte */}
             <Text style={styles.ref}>
-                Código de referencia: {reference || "N/A"}
+                Reference: {reference || "N/A"}
             </Text>
 
             {/* Botón para volver al inicio */}
@@ -69,59 +69,5 @@ function ScreenError() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: customTheme.spacing(3),
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: customTheme.colors.background,
-    },
-
-    lottie: {
-        width: 200,
-        height: 200,
-        marginBottom: customTheme.spacing(2),
-    },
-
-    codigo: {
-        fontSize: customTheme.fontSize.large,
-        fontWeight: "bold",
-        color: customTheme.colors.error,
-        marginBottom: customTheme.spacing(1),
-    },
-
-    mensaje: {
-        fontSize: customTheme.fontSize.normal,
-        textAlign: "center",
-        marginBottom: customTheme.spacing(1),
-    },
-
-    ref: {
-        fontSize: customTheme.fontSize.small,
-        color: customTheme.colors.info,
-        marginBottom: customTheme.spacing(3),
-    },
-
-    button: {
-        backgroundColor: customTheme.colors.secondary,
-        flexDirection: "row",
-        width: "80%",
-        paddingVertical: customTheme.spacing(2),
-        borderRadius: 10,
-        marginBottom: customTheme.spacing(1),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    buttonText: {
-        color: customTheme.colors.textSecondary,
-        fontSize: customTheme.fontSize.normal,
-        fontWeight: "bold",
-        flex: 1,
-        textAlign:"center",
-    }
-});
 
 export default ScreenError;

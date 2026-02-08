@@ -18,4 +18,4 @@
  * OPERACIONES: GET, POST, PUT, DELETE, etc...
  * 
  */
-import { supabase } from '../../config/supabaseClient';
+//import { supabase } from '../../config/supabaseClient';

@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Text, TextInput, Button } from 'react-native-paper';
-import customTheme from '../theme/Theme';
-import { useNavigation } from '@react-navigation/native';
+import { View, Alert, Pressable } from 'react-native';
+import { Text, TextInput } from 'react-native-paper';
 import { router } from 'expo-router';
+import { styles } from "../../styles/PagoEfectivoStyle";
 
-export default function PagoEfectivo() {
+function PagoEfectivo() {
 
 const Aceptar = () => {
   router.push({ pathname: "/screens/Confirmacion"});
@@ -43,50 +42,18 @@ const Volver = () => {
         value={importe}
         onChangeText={setImporte}
         placeholder="0.00"
-        activeOutlineColor={customTheme.colors.primary}
+        activeOutlineColor={styles.Outline.color}
       />
 
-      <View style={styles.buttons}>
-        <View style={styles.button}>
-          <Button mode="contained" onPress={handleAceptar} buttonColor={customTheme.colors.secondary}>
-            Aceptar
-          </Button>
-        </View>
-        <View style={styles.button}>
-          <Button mode="contained" onPress={Volver} buttonColor={customTheme.colors.secondary}>
-            Volver
-          </Button>
-        </View>
-      </View> 
+      <Pressable style={styles.button} onPress={handleAceptar}>
+        <Text style={styles.buttonText}>ACEPTAR</Text>
+      </Pressable>
+
+      <Pressable style={styles.button} onPress={Volver}>
+          <Text style={styles.buttonText}>VOLVER</Text>
+      </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: customTheme.spacing(2.5),
-    justifyContent: 'center',
-    backgroundColor: customTheme.colors.background,
-  },
-  MainText: {
-    fontSize: customTheme.fontSize.large,
-    color: customTheme.colors.primary,
-    fontWeight: 'bold',
-    marginBottom: customTheme.spacing(2.5),
-    textAlign: 'center',
-  },
-  input: {
-    borderRadius: 6,
-    marginBottom: customTheme.spacing(2.5),
-  },
-  buttons: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'stretch',
-  },
-  button: {
-    width: '100%',
-    marginVertical: customTheme.spacing(0.75),
-  },
-});
+export default PagoEfectivo;
