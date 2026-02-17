@@ -2,10 +2,12 @@ import * as React from 'react';
 import { useState } from 'react';
 import { View, Alert, Pressable } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { styles } from "../../styles/PagoEfectivoStyle";
 
 function PagoEfectivo() {
+  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+  const TOTAL = parseFloat(totalParam || '0');
 
 const Aceptar = () => {
   router.push({ pathname: "/screens/Confirmacion"});
@@ -17,9 +19,6 @@ const Volver = () => {
 
 
   const [importe, setImporte] = useState('');
-
-  // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
-  const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   const handleAceptar = () => {
     const value = parseFloat(importe.replace(',', '.')) || 0;

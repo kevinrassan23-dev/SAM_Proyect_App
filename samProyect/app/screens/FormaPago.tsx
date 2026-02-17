@@ -1,20 +1,21 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { styles } from "../../styles/FormaPagoStyle";
 
 function FormaPago() {
+    const { total } = useLocalSearchParams<{ total: string }>();
 
     const efectivo = () => {
-        router.push({ pathname: "/screens/PagoEfectivo"});
+        router.push({ pathname: "/screens/PagoEfectivo", params: { total } });
     }
 
     const NFC = () => {
-        router.push({ pathname: "/screens/PagoNFC"});
+        router.push({ pathname: "/screens/PagoNFC", params: { total } });
     }
 
     const tarjeta = () => {
-        router.push({ pathname: "/screens/PagoTarjeta"});
+        router.push({ pathname: "/screens/PagoTarjeta", params: { total } });
     }
 
     const Volver = () => {
