@@ -2,15 +2,14 @@ import * as React from 'react';
 import { useState } from 'react';
 import { View, Alert, Pressable } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { styles } from "../../styles/PagoTarjetaStyle";
 
 function PagoTarjeta() {
+  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+  const TOTAL = parseFloat(totalParam || '0');
   const [pin, setPin] = useState('');
-
-  // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
-  const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   const Volver = () => {
     router.push({ pathname: "/screens/FormaPago"});

@@ -4,15 +4,14 @@ import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { Text, Button } from 'react-native-paper';
 import customTheme from '../../theme/Theme';
 import { useNavigation } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { styles } from "../../styles/PagoNFCStyle";
 
 function PagoNFC() {
   const navigation = useNavigation<any>();
+  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+  const TOTAL = parseFloat(totalParam || '0');
   const [pagoAceptado, setPagoAceptado] = useState(false);
-
-  // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
-  const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   useEffect(() => {
 
