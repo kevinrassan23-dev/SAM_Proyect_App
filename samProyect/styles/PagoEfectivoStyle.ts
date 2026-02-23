@@ -4,47 +4,113 @@ import theme from "../theme/Theme";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: theme.spacing(2.5),
-        justifyContent: "center",
+        paddingHorizontal: theme.spacing(3),
+        paddingVertical: theme.spacing(4),
+        justifyContent: "space-between",
         backgroundColor: theme.colors.background,
     },
 
-    MainText: {
-        fontSize: theme.fontSize.large,
+    headerSection: {
+        marginBottom: theme.spacing(4),
+    },
+
+    titleText: {
+        fontSize: 32,
         color: theme.colors.primary,
-        fontWeight: "bold",
-        marginBottom: theme.spacing(2.5),
+        fontWeight: "800",
+        marginBottom: theme.spacing(3),
         textAlign: "center",
+        letterSpacing: -0.5,
+    },
+
+    totalCard: {
+        backgroundColor: "#ffffff",
+        borderRadius: 18,
+        padding: theme.spacing(3.5),
+        marginBottom: theme.spacing(4),
+        borderLeftWidth: 5,
+        borderLeftColor: theme.colors.primary,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
+    },
+
+    totalLabel: {
+        fontSize: theme.fontSize.small,
+        color: "#888",
+        marginBottom: theme.spacing(1),
+        fontWeight: "600",
+        textTransform: "uppercase",
+        letterSpacing: 1,
+    },
+
+    totalAmount: {
+        fontSize: 32,
+        color: theme.colors.primary,
+        fontWeight: "700",
+    },
+
+    formSection: {
+        flex: 1,
+        justifyContent: "center",
+        marginBottom: theme.spacing(4),
+    },
+
+    inputLabel: {
+        fontSize: theme.fontSize.normal,
+        color: theme.colors.textPrimary,
+        fontWeight: "600",
+        marginBottom: theme.spacing(1.5),
     },
 
     input: {
-        width: "100%",
-        backgroundColor: theme.colors.background,
-        borderWidth: 1,
-        borderColor: theme.colors.success,
-        borderRadius: 8,
-        // ESTO
-        padding: theme.spacing(0.2),
-        fontSize: theme.fontSize.normal,
-        color: theme.colors.textPrimary, 
-        marginBottom: theme.spacing(2),
+        backgroundColor: "#f9f9f9",
+        borderWidth: 2,
+        borderColor: "#e0e0e0",
+        borderRadius: 12,
+        paddingHorizontal: theme.spacing(2.5),
+        paddingVertical: theme.spacing(2),
+        fontSize: 18,
+        color: theme.colors.textPrimary,
+        marginBottom: theme.spacing(4),
+        fontWeight: "500",
+    },
+
+    buttonsContainer: {
+        gap: theme.spacing(2),
     },
 
     button: {
         backgroundColor: theme.colors.secondary,
         width: "100%",
-        paddingVertical: theme.spacing(1.5),
+        paddingVertical: theme.spacing(2.25),
         borderRadius: 30,
-        marginBottom: theme.spacing(2),
         alignItems: "center",
-        justifyContent: "flex-start",
-        flexDirection: "column",
+        justifyContent: "center",
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.18,
+        shadowRadius: 5,
+    },
+
+    buttonSecondary: {
+        backgroundColor: "#f0f0f0",
+        elevation: 2,
+        shadowOpacity: 0.08,
     },
 
     buttonText: {
         color: theme.colors.textSecondary,
         fontSize: theme.fontSize.normal,
-        fontWeight: "bold",
+        fontWeight: "700",
+        letterSpacing: 0.5,
+    },
+
+    buttonTextSecondary: {
+        color: theme.colors.primary,
     },
 
     Outline: {
