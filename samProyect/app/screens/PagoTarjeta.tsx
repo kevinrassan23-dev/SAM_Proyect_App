@@ -11,6 +11,7 @@ function PagoTarjeta() {
   const TOTAL = parseFloat(totalParam || '0');
   const [pin, setPin] = useState('');
 
+
   const Volver = () => {
     router.push({ pathname: "/screens/FormaPago"});
   }
@@ -31,36 +32,49 @@ function PagoTarjeta() {
     }
   };
 
-return (
-  <View style={styles.container}>
-    <Text style={styles.MainText}>
-      Total a pagar: ${TOTAL.toFixed(2)}
-    </Text>
+  const handleVolver = () => {
+    router.push({ pathname: "/screens/FormaPago" });
+  };
 
-    <Text style={styles.MainText}>
-      Ingrese el PIN de su tarjeta
-    </Text>
+  return (
+    <View style={styles.container}>
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <Text style={styles.titleText}>Pago con Tarjeta</Text>
+      </View>
 
-    <TextInput
-      mode="outlined"
-      style={styles.input}
-      keyboardType="numeric"
-      secureTextEntry
-      value={pin}
-      onChangeText={handlePinChange}
-      placeholder="Ej: 1234"
-      activeOutlineColor={styles.Outline.color}
-    />
+      {/* Total Card */}
+      <View style={styles.totalCard}>
+        <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
+        <Text style={styles.totalAmount}>${TOTAL.toFixed(2)}</Text>
+      </View>
 
-    <Pressable style={styles.button} onPress={handleAceptar}>
-      <Text style={styles.buttonText}>ACEPTAR</Text>
-    </Pressable>
+      {/* Form Section */}
+      <View style={styles.formSection}>
+        <Text style={styles.inputLabel}>Ingrese el PIN de su tarjeta</Text>
+        <TextInput
+          mode="outlined"
+          style={styles.input}
+          keyboardType="numeric"
+          secureTextEntry
+          value={pin}
+          onChangeText={handlePinChange}
+          placeholder="••••"
+        />
+      </View>
 
-    <Pressable style={styles.button} onPress={Volver}>
-      <Text style={styles.buttonText}>VOLVER</Text>
-    </Pressable>
-  </View>
-);
+      {/* Buttons Section */}
+      <View style={styles.buttonsContainer}>
+        <Pressable style={styles.button} onPress={handleAceptar}>
+          <Text style={styles.buttonText}>ACEPTAR</Text>
+        </Pressable>
+
+        <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleVolver}>
+          <Text style={[styles.buttonText, styles.buttonTextSecondary]}>VOLVER</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 export default PagoTarjeta;
