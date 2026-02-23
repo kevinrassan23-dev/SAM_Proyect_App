@@ -59,7 +59,6 @@ function PagoTarjeta() {
           secureTextEntry
           value={pin}
           onChangeText={handlePinChange}
-          placeholder="••••"
         />
       </View>
 
