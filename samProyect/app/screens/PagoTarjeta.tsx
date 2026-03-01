@@ -2,15 +2,15 @@ import * as React from 'react';
 import { useState } from 'react';
 import { View, Alert, Pressable } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { styles } from "../../styles/PagoTarjetaStyle";
 
 function PagoTarjeta() {
+  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+  const TOTAL = parseFloat(totalParam || '0');
   const [pin, setPin] = useState('');
 
-  // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
-  const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
 
   const Volver = () => {
     router.push({ pathname: "/screens/FormaPago"});
@@ -32,36 +32,48 @@ function PagoTarjeta() {
     }
   };
 
-return (
-  <View style={styles.container}>
-    <Text style={styles.MainText}>
-      Total a pagar: ${TOTAL.toFixed(2)}
-    </Text>
+  const handleVolver = () => {
+    router.push({ pathname: "/screens/FormaPago" });
+  };
 
-    <Text style={styles.MainText}>
-      Ingrese el PIN de su tarjeta
-    </Text>
+  return (
+    <View style={styles.container}>
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <Text style={styles.titleText}>Pago con Tarjeta</Text>
+      </View>
 
-    <TextInput
-      mode="outlined"
-      style={styles.input}
-      keyboardType="numeric"
-      secureTextEntry
-      value={pin}
-      onChangeText={handlePinChange}
-      placeholder="Ej: 1234"
-      activeOutlineColor={styles.Outline.color}
-    />
+      {/* Total Card */}
+      <View style={styles.totalCard}>
+        <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
+        <Text style={styles.totalAmount}>${TOTAL.toFixed(2)}</Text>
+      </View>
 
-    <Pressable style={styles.button} onPress={handleAceptar}>
-      <Text style={styles.buttonText}>ACEPTAR</Text>
-    </Pressable>
+      {/* Form Section */}
+      <View style={styles.formSection}>
+        <Text style={styles.inputLabel}>Ingrese el PIN de su tarjeta</Text>
+        <TextInput
+          mode="outlined"
+          style={styles.input}
+          keyboardType="numeric"
+          secureTextEntry
+          value={pin}
+          onChangeText={handlePinChange}
+        />
+      </View>
 
-    <Pressable style={styles.button} onPress={Volver}>
-      <Text style={styles.buttonText}>VOLVER</Text>
-    </Pressable>
-  </View>
-);
+      {/* Buttons Section */}
+      <View style={styles.buttonsContainer}>
+        <Pressable style={styles.button} onPress={handleAceptar}>
+          <Text style={styles.buttonText}>ACEPTAR</Text>
+        </Pressable>
+
+        <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleVolver}>
+          <Text style={[styles.buttonText, styles.buttonTextSecondary]}>VOLVER</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 export default PagoTarjeta;
