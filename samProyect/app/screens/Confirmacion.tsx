@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, Text} from "react-native";
-import {router} from "expo-router";
+import { View, Text } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import LottieView from "lottie-react-native";
 import { styles } from "../../styles/ConfirmacionStyle";
+import { supabase } from "../supabaseClient";
 
 
 function Confirmacion() {
+    const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+    const TOTAL = parseFloat(totalParam || '0');
 
     const [proceso, setProceso] = useState(1);
 
     useEffect(() => {
+        insertarPedido();
+
         const timers = [
 
             // Cambiamos al proceso 2 despues de 8s
@@ -56,29 +61,52 @@ function Confirmacion() {
         }
     };
 
-    return(
+    async function insertarPedido() {
+        const { data, error } = await supabase
+            .from('Pedidos')
+            .insert([
+                {
+                    DNI_Paciente: 'Desconocido',
+                    Tipo_Paciente: 'Desconocido',
+                    Descuento_Aplicado: 0,
+                    Precio_Total: TOTAL,
+                    Estado: '{\generando\}',
+                    Fecha_Hora: new Date().toISOString()
+                }
+            ])
+            .select()
+
+        if (error) {
+            console.error('Error al insertar:', error)
+            return
+        }
+
+        console.log('Pedido insertado:', data)
+    }
+
+    return (
 
         <View style={styles.container}>
             <View style={styles.content}>
-            <Text style={styles.titulo}>Estado del pedido:</Text>
+                <Text style={styles.titulo}>Estado del pedido:</Text>
 
-            <View style={styles.box}>
-                <Text style={styles.texto}>{textoProceso()}</Text>
+                <View style={styles.box}>
+                    <Text style={styles.texto}>{textoProceso()}</Text>
 
-                {proceso < 6 && (
-                    <LottieView
-                        source={require("../../assets/lottie/barcodeScanner.json")}
-                        autoPlay
-                        loop
-                        style={styles.scanner}
-                    />
-                )}
+                    {proceso < 6 && (
+                        <LottieView
+                            source={require("../../assets/lottie/barcodeScanner.json")}
+                            autoPlay
+                            loop
+                            style={styles.scanner}
+                        />
+                    )}
 
-                {proceso === 6 && (
-                    <Text style={styles.check}>✔</Text>
-                )}
+                    {proceso === 6 && (
+                        <Text style={styles.check}>✔</Text>
+                    )}
+                </View>
             </View>
-        </View>
         </View>
     );
 }
