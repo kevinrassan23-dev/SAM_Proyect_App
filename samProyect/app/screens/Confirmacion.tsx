@@ -70,7 +70,6 @@ function Confirmacion() {
                     Tipo_Paciente: 'Desconocido',
                     Descuento_Aplicado: 0,
                     Precio_Total: TOTAL,
-                    Estado: '{\generando\}',
                     Fecha_Hora: new Date().toISOString()
                 }
             ])
