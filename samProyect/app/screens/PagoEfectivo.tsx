@@ -15,7 +15,8 @@ const Aceptar = () => {
 }
 
 const Volver = () => {
-  router.push({ pathname: "/screens/FormaPago"});
+  // send total back so FormaPago retains amount
+  router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
 }
 
 
@@ -31,7 +32,7 @@ const Volver = () => {
   };
 
   const handleVolver = () => {
-    router.push({ pathname: "/screens/FormaPago" });
+    router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
   };
 
   return (

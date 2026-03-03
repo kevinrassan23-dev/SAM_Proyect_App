@@ -30,7 +30,7 @@ function PagoNFC() {
   };
 
   const handleVolver = () => {
-    router.push({ pathname: "/screens/FormaPago" });
+    router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
   };
 
   return (
