@@ -18,7 +18,8 @@ function PagoNFC() {
 
     if (pagoAceptado) {
       timer = setTimeout(() => {
-        router.push({ pathname: "/screens/Confirmacion" });
+        // forward total when redirecting
+        router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString() } });
       }, 5000);
     }
     return () => clearTimeout(timer);

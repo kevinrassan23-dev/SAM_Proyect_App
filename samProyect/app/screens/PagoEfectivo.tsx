@@ -10,7 +10,8 @@ function PagoEfectivo() {
   const TOTAL = parseFloat(totalParam || '0');
 
 const Aceptar = () => {
-  router.push({ pathname: "/screens/Confirmacion"});
+  // ensure total is forwarded so Confirmacion can insert correct value
+  router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString() } });
 }
 
 const Volver = () => {
@@ -23,8 +24,8 @@ const Volver = () => {
   const handleAceptar = () => {
     const value = parseFloat(importe.replace(',', '.')) || 0;
     if (value >= TOTAL) {
-      router.push({ pathname: "/screens/Confirmacion" });
-    } else {
+      router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString() } });
+      } else {
       Alert.alert('Pago insuficiente', 'No se puede procesar el pago: el importe es menor al total.');
     }
   };
