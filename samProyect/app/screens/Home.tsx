@@ -1,70 +1,26 @@
-import { router } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import customTheme from "../theme/Theme";
+import { View, Text, Pressable, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { styles } from "../../styles/HomeStyle";
 
 function Home() {
+  const router = useRouter();
 
-    const FormaPago = () => {
-        router.push({ pathname: "/screens/FormaPago"});
-    }
+  return (
+    <View style={styles.container}>
 
-    const VerificationChoice = () => {
-        router.push({ pathname: "/screens/VerificacionChoice"});
-    }
+      <Image
+        source={require("../../assets/images/sam_logo.png")}
+        style={styles.image}
+      />
 
-    return (
-        <View style={styles.container}>
-
-            <Text style={styles.title}>Home</Text>
-
-            <View style={{ flexDirection: 'column', gap: customTheme.spacing(2), justifyContent: "center", alignItems: "center", }}>
-                <Pressable style={styles.button} onPress={FormaPago}>
-                    <Text style={styles.buttonText}>FormaPago</Text>
-                </Pressable>
-
-                <Pressable style={styles.button} onPress={VerificationChoice}>
-                    <Text style={styles.buttonText}>VerificationChoice</Text>
-                </Pressable>
-            </View>
-        </View>
-    );
+      <Pressable
+        style={styles.button}
+        onPress={() => router.push("/screens/Hall")}
+      >
+        <Text style={styles.buttonText}>ACCEDER</Text>
+      </Pressable>
+    </View>
+  );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: customTheme.spacing(2),
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: customTheme.colors.background,
-    },
-    title: {
-        fontSize: customTheme.fontSize.title,
-        fontWeight: "bold",
-        color: customTheme.colors.primary,
-        marginVertical: customTheme.spacing(3),
-        textAlign: "center",
-    },
-
-    button: {
-        backgroundColor: customTheme.colors.secondary,
-        width: "80%",
-        flexDirection: "row",
-        paddingVertical: customTheme.spacing(2),
-        borderRadius: 10,
-        marginBottom: customTheme.spacing(2),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    buttonText: {
-        color: customTheme.colors.textSecondary,
-        fontSize: customTheme.fontSize.large,
-        fontWeight: "bold",
-        flex: 1,
-        textAlign: "center",
-    },
-});
-
 export default Home;

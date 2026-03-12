@@ -1,23 +1,42 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import customTheme from "../theme/Theme";
+import { Pressable, Text, TextInput, View } from "react-native";
+
+import { pacientesService } from "@/services";
+import { styles } from "../../styles/VerificacionMovilStyle";
 
 function VerificacionMovil() {
-    const [CODIGO, SETCODIGO] = useState({
-        Codigo: '',
-    });
+    const { cartilla } = useLocalSearchParams<{ cartilla: string }>();
 
-    const cambios = (e: any) => {
-        SETCODIGO(CODIGO => ({
-            ...CODIGO,
-            Codigo: e
-        }));
-    }
+    const [TLF, setTLF] = useState("");
+    const [Error, setError] = useState("");
+    const [Verificar, setVerificar] = useState(false);
 
-    const aceptar = () => {
-        router.push("/screens/Hall")
+    const cambios = (text: string) => {
+        setTLF(text);
     }
+    const aceptar = async () => {
+
+        setVerificar(true);
+        setError("");
+
+        try {
+            const VERFICACIÓN = await pacientesService.validarPorCartillaYTelefono(cartilla, TLF);
+
+            if (!VERFICACIÓN.valido) {
+                setError("No se ha podido verificar su número de teléfono, intentelo de nuevo");
+                return;
+            }
+
+            router.push({ pathname: "/screens/Hall"});
+
+
+        } catch (e: any) {
+            router.push("/screens/ScreenError");
+        } finally {
+            setVerificar(false);
+        }
+    };
 
     const volver = () => {
         router.push("/screens/VerificacionChoice")
@@ -26,18 +45,24 @@ function VerificacionMovil() {
     return (
         <View style={styles.container}>
 
-            <Text style={styles.title}>INGRESE EL CODIGO QUE SE LE HA ENVIADO</Text>
+            <Text style={styles.title}>INGRESE LOS ÚLTIMOS 4 DIGITOS DE SU NÚMERO DE TELÉFONO</Text>
 
-            <View style={{ height: customTheme.spacing(2) }} />
+            <View style={styles.view1} />
 
-            <TextInput placeholder="Codigo" value={CODIGO.Codigo} onChangeText={cambios} style={styles.input} secureTextEntry={true} />
+            <TextInput placeholder="Codigo" value={TLF} onChangeText={cambios} style={styles.input} secureTextEntry={true} maxLength={4} />
 
-            <View style={{ height: customTheme.spacing(4) }} />
+            {Error !== "" && (
+                <Text style={styles.error}>{Error}</Text>
+            )}
 
-            <View style={{ flexDirection: 'column', gap: customTheme.spacing(2), justifyContent: "center", alignItems: "center", }}>
+            <View style={styles.view2} />
 
-                <Pressable style={styles.button} onPress={aceptar}>
-                    <Text style={styles.buttonText}>ACEPTAR</Text>
+            <View style={styles.VerificacionChoiceContainer}>
+
+                <Pressable style={styles.button} onPress={aceptar} disabled={Verificar}>
+                    <Text style={styles.buttonText}>
+                        {Verificar ? "VERIFICANDO..." : "ACEPTAR"}
+                    </Text>
                 </Pressable>
 
                 <Pressable style={[styles.button]} onPress={volver}>
@@ -48,52 +73,5 @@ function VerificacionMovil() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: customTheme.spacing(2),
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: customTheme.colors.background,
-    },
-    title: {
-        fontSize: customTheme.fontSize.title,
-        fontWeight: "bold",
-        color: customTheme.colors.primary,
-        marginVertical: customTheme.spacing(3),
-        textAlign: "center",
-    },
-
-    button: {
-        backgroundColor: customTheme.colors.secondary,
-        width: "80%",
-        flexDirection: "row",
-        paddingVertical: customTheme.spacing(2),
-        borderRadius: 10,
-        marginBottom: customTheme.spacing(2),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    buttonText: {
-        color: customTheme.colors.textSecondary,
-        fontSize: customTheme.fontSize.large,
-        fontWeight: "bold",
-        flex: 1,
-        textAlign: "center",
-    },
-    input: {
-        width: "80%",
-        backgroundColor: "#FFFFFF",
-        borderWidth: 2,
-        borderColor: customTheme.colors.success,
-        borderRadius: 8,
-        padding: customTheme.spacing(1.5),
-        fontSize: customTheme.fontSize.normal,
-        color: customTheme.colors.textPrimary,
-        marginBottom: customTheme.spacing(2),
-    },
-});
 
 export default VerificacionMovil;
