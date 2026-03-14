@@ -1,13 +1,8 @@
-/**
- * NOS CONECTAMOS A LA API DE SUPABASE:
- * 
- * EJEMPLO:
- * 
- * import { createClient } from '@supabase/supabase-js';
- * 
- * const SUPABASE_URL = 'https://xxxx.supabase.co';
- * const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6...';
- * 
- * export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
- * 
- */
+import { createClient } from '@supabase/supabase-js';
+
+// NOTE: Expo ya carga las variables de entorno desde .env.local
+// (ej: EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY)
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL as string;
+const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string;
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
