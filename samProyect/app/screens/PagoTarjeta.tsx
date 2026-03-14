@@ -18,7 +18,7 @@ function PagoTarjeta() {
 
   const handleAceptar = () => {
     if (pin.length === 4) {
-      router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString() } });
+      router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "tarjeta" } });
     } else {
       Alert.alert('PIN incompleto', 'Por favor, ingrese exactamente 4 dígitos.');
     }
