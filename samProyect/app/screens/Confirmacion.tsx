@@ -44,7 +44,7 @@ function Confirmacion() {
             setPedidoId(resultado.pedidoId ?? null);
             setProceso(2);
 
-            await delay(2000);
+            await delay(5000);
             if (cancelled) return;
 
             setProceso(3);
@@ -60,15 +60,15 @@ function Confirmacion() {
             }
 
             setProceso(4);
-            await delay(2000);
+            await delay(5000);
             if (cancelled) return;
 
             setProceso(5);
-            await delay(2000);
+            await delay(5000);
             if (cancelled) return;
 
             setProceso(6);
-            await delay(2000);
+            await delay(5000);
             if (cancelled) return;
 
             router.push("/screens/Home");

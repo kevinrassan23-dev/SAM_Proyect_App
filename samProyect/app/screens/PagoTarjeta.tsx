@@ -12,10 +12,6 @@ function PagoTarjeta() {
   const [pin, setPin] = useState('');
 
 
-  const Volver = () => {
-    router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
-  }
-
   const handleAceptar = () => {
     if (pin.length === 4) {
       router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "tarjeta" } });

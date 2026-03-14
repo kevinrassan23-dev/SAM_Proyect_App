@@ -9,10 +9,6 @@ function PagoEfectivo() {
   const { total: totalParam } = useLocalSearchParams<{ total: string }>();
   const TOTAL = parseFloat(totalParam || '0');
 
-const Volver = () => {
-  // send total back so FormaPago retains amount
-  router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
-}
 
 
   const [importe, setImporte] = useState('');
@@ -21,7 +17,7 @@ const Volver = () => {
     const value = parseFloat(importe.replace(',', '.')) || 0;
     if (value >= TOTAL) {
       router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "efectivo" } });
-      } else {
+    } else {
       Alert.alert('Pago insuficiente', 'No se puede procesar el pago: el importe es menor al total.');
     }
   };
