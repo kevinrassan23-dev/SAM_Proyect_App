@@ -4,47 +4,103 @@ import theme from "../theme/Theme";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: theme.spacing(2.5),
+        padding: theme.spacing(2),
         justifyContent: "center",
+        alignItems: "center",
         backgroundColor: theme.colors.background,
     },
 
-    MainText: {
-        fontSize: theme.fontSize.large,
+    headerSection: {
+        marginBottom: theme.spacing(2),
+    },
+
+    titleText: {
+        fontSize: theme.fontSize.title,
         color: theme.colors.primary,
         fontWeight: "bold",
-        marginBottom: theme.spacing(2.5),
         textAlign: "center",
+    },
+
+    totalCard: {
+        backgroundColor: "#ffffff",
+        borderRadius: 8,
+        padding: theme.spacing(2),
+        marginBottom: theme.spacing(3),
+        borderLeftWidth: 4,
+        borderLeftColor: theme.colors.secondary,
+        width: "80%",
+    },
+
+    totalLabel: {
+        fontSize: theme.fontSize.small,
+        color: "#666",
+        marginBottom: theme.spacing(1),
+        fontWeight: "600",
+    },
+
+    totalAmount: {
+        fontSize: 28,
+        color: theme.colors.secondary,
+        fontWeight: "bold",
+    },
+
+    formSection: {
+        width: "80%",
+        marginBottom: theme.spacing(3),
+    },
+
+    inputLabel: {
+        fontSize: theme.fontSize.normal,
+        color: theme.colors.textPrimary,
+        fontWeight: "600",
+        marginBottom: theme.spacing(1),
     },
 
     input: {
         width: "100%",
-        backgroundColor: theme.colors.background,
-        borderWidth: 1,
+        backgroundColor: "#FFFFFF",
+        borderWidth: 2,
         borderColor: theme.colors.success,
         borderRadius: 8,
-        padding: theme.spacing(0.2),
+        paddingHorizontal: theme.spacing(2),
         fontSize: theme.fontSize.normal,
         color: theme.colors.textPrimary,
         marginBottom: theme.spacing(2),
     },
 
+    buttonsContainer: {
+        flexDirection: "column",
+        gap: theme.spacing(2),
+        justifyContent: "center",
+        alignItems: "center",
+        width: "80%",
+    },
+
     button: {
         backgroundColor: theme.colors.secondary,
         width: "100%",
-        paddingVertical: theme.spacing(1.5),
+        paddingVertical: theme.spacing(2),
         borderRadius: 30,
-        marginBottom: theme.spacing(2),
         alignItems: "center",
+        justifyContent: "center",
+    },
+
+    buttonSecondary: {
+        backgroundColor: theme.colors.error,
     },
 
     buttonText: {
         color: theme.colors.textSecondary,
-        fontSize: theme.fontSize.normal,
+        fontSize: theme.fontSize.large,
         fontWeight: "bold",
+        textAlign: "center",
+    },
+
+    buttonTextSecondary: {
+        color: theme.colors.textSecondary,
     },
 
     Outline: {
-        color: theme.colors.primary,
+        color: theme.colors.primary
     },
 });

@@ -1,16 +1,18 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { styles } from "../../styles/VerificacionChoiceStyle";
 
 function VerificacionChoice() {
+    const { cartilla } = useLocalSearchParams<{ cartilla: string }>();  
 
-    const DNI = () => {
-        router.push({ pathname: "/screens/VerificacionDNI"});
+
+    const Contraseña = () => {
+        router.push({ pathname: "/screens/VerificacionContrasena", params: { cartilla: cartilla }});
     }
 
-    const Teléfono = () => {
-        router.push({ pathname: "/screens/VerificacionMovil"});
+    const Telefono = () => {
+        router.push({ pathname: "/screens/VerificacionMovil", params: { cartilla: cartilla }});
     }
 
     const Volver = () => {
@@ -20,18 +22,18 @@ function VerificacionChoice() {
     return (
         <View style={styles.container}>
 
-            <Text style={styles.title}>¿COMO DESEA VERIFICARSE?</Text>
+            <Text style={styles.title}>¿Cómo desea autenticarse?</Text>
 
             <View style={styles.VerificacionChoiceContiner}>
-                <Pressable style={styles.button} onPress={DNI}>
-                    <Text style={styles.buttonText}>USAR DNI</Text>
+                <Pressable style={styles.button} onPress={Contraseña}>
+                    <Text style={styles.buttonText}>USAR MI CONTRASEÑA</Text>
                 </Pressable>
 
-                <Pressable style={styles.button} onPress={Teléfono}>
-                    <Text style={styles.buttonText}>USAR TELÉFONO</Text>
+                <Pressable style={styles.button} onPress={Telefono}>
+                    <Text style={styles.buttonText}>USAR MI TELÉFONO</Text>
                 </Pressable>
 
-                <Pressable style={styles.button} onPress={Volver}>
+                <Pressable style={styles.buttonVolver} onPress={Volver}>
                     <Text style={styles.buttonText}>VOLVER A LA TIENDA</Text>
                 </Pressable>
             </View>

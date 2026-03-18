@@ -1,27 +1,24 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
-import { Text, Button } from 'react-native-paper';
-import customTheme from '../../theme/Theme';
+import { View, Image, Pressable } from 'react-native';
+import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { styles } from "../../styles/PagoNFCStyle";
 
 function PagoNFC() {
   const navigation = useNavigation<any>();
+  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+  const TOTAL = parseFloat(totalParam || '0');
   const [pagoAceptado, setPagoAceptado] = useState(false);
 
-  // VALOR FIJO POR AHORA (RECIBIR DESDE HALL.TSX)
-  const TOTAL = 100; // <-- REEMPLAZAR POR VARIABLE DE HALL.TSX
-
   useEffect(() => {
-
-    // CUIDADO CON ESTO
     let timer: ReturnType<typeof setTimeout>;
 
     if (pagoAceptado) {
       timer = setTimeout(() => {
-        router.push({ pathname: "/screens/Confirmacion" });
+        // forward total and method when redirecting
+        router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "nfc" } });
       }, 5000);
     }
     return () => clearTimeout(timer);
@@ -31,52 +28,55 @@ function PagoNFC() {
     setPagoAceptado(true);
   };
 
+  const handleVolver = () => {
+    router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
+  };
+
   return (
     <View style={styles.container}>
 
-      {/* Contenedor del Contenido - Centrado en el espacio restante */}
+      {/* Content Section */}
       <View style={styles.content}>
+        <Text style={styles.titleText}>Pago con NFC</Text>
         {!pagoAceptado ? (
           <>
-            <Text style={styles.MainText}>Total a pagar: ${TOTAL.toFixed(2)}</Text>
-            
+            {/* Total Card */}
+            <View style={styles.totalCard}>
+              <Text style={styles.totalLabel}>Total a pagar</Text>
+              <Text style={styles.totalAmount}>{TOTAL.toFixed(2)}€</Text>
+            </View>
+
+            {/* NFC Image */}
             <View style={styles.imagePlaceholder}>
-              {<Image source={require('../../assets/images/nfc_scan.png')} style={styles.image} />}
+              <Image source={require('../../assets/images/nfc_scan.png')} style={styles.image} />
             </View>
 
+            {/* Instruction Text */}
             <Text style={styles.instructionText}>Acerque su dispositivo al terminal para pagar</Text>
-
-            <View style={styles.buttons}>
-              <View style={styles.button}>
-                <Button 
-                  mode="contained" 
-                  onPress={handleEscanear} 
-                  buttonColor={customTheme.colors.secondary}
-                >
-                  ESCANEAR
-                </Button>
-              </View>
-              <View style={styles.button}>
-                <Button 
-                  mode="contained" 
-                  onPress={() => router.push({ pathname: "/screens/FormaPago"})} 
-                  buttonColor={customTheme.colors.secondary}
-                >
-                  VOLVER
-                </Button>
-              </View>
-            </View>
           </>
         ) : (
           <View style={styles.successContainer}>
+            {/* Success Image */}
             <View style={styles.imagePlaceholder}>
-              {<Image source={require('../../assets/images/payment_success.png')} style={styles.image} />}
+              <Image source={require('../../assets/images/payment_success.png')} style={styles.image} />
             </View>
-            <Text style={styles.successText}>¡Pago Aceptado!</Text>
+            <Text style={styles.successText}>Â¡Pago Aceptado!</Text>
             <Text style={styles.redirectText}>Redirigiendo en unos segundos...</Text>
           </View>
         )}
       </View>
+
+      {/* Buttons Section */}
+      {!pagoAceptado && (
+        <View style={styles.buttons}>
+          <Pressable style={styles.button} onPress={handleEscanear}>
+            <Text style={styles.buttonText}>ESCANEAR</Text>
+          </Pressable>
+          <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleVolver}>
+            <Text style={[styles.buttonText, styles.buttonTextSecondary]}>VOLVER</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }

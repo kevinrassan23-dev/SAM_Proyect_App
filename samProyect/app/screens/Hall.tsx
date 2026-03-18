@@ -1,92 +1,140 @@
-import React, { useState } from "react";
-import { View, Text, Pressable, FlatList, 
-        Modal, Image, ScrollView, TextInput, 
+import React, { useState, useEffect } from "react";
+import {
+  View, Text, Pressable, FlatList,
+  Modal, Image, ScrollView, TextInput, ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { styles } from "../../styles/HallStyle";
+import { medicamentosService, Medicamento } from "@/services/supabase/medicamentos.service";
 
-/* =======================
-  INTERFACE
-======================= */
-interface Product {
-  id: string;
-  nombre: string;
-  marca: string;
-  tipo: string;
-  precio: number;
-}
-
-/* =======================
-  DATA
-======================= */
-const receta: Product[] = [];
-
-// POR AHORA FORZAMOS LOS MEDICAMENTOS, CUANDO REALICEMOS EL BACKEND, LOS MEDICAMENTOS QUE SE 
-// MOSTRARÁN SERÁN LOS QUE ESTARÁN EN LA BASE DE DATOS 
-const medicamentosPorCategoria: Record<string, Product[]> = {
-  Analgésicos: [
-    { id: "a1", nombre: "Ibudol", marca: "Genérico", tipo: "Cápsula", precio: 3.5 },
-    { id: "a2", nombre: "Dolostop", marca: "Bayer", tipo: "Tableta", precio: 4.0 },
-    { id: "a3", nombre: "Actron", marca: "Actron", tipo: "Cápsula", precio: 4.8 },
-    { id: "a4", nombre: "Voltadol Forte", marca: "GSK", tipo: "Gel", precio: 6.2 },
-    { id: "a5", nombre: "Epididol", marca: "Grünenthal", tipo: "Tableta", precio: 5.0 },
-  ],
-  Alérgenos: [
-    { id: "al1", nombre: "Loratadina", marca: "MK", tipo: "Tableta", precio: 3.0 },
-    { id: "al2", nombre: "Cetirizina", marca: "Bayer", tipo: "Tableta", precio: 3.8 },
-    { id: "al3", nombre: "Desloratadina", marca: "Normon", tipo: "Tableta", precio: 4.2 },
-    { id: "al4", nombre: "Fexofenadina", marca: "Teva", tipo: "Tableta", precio: 4.5 },
-    { id: "al5", nombre: "Clorfenamina", marca: "Genérico", tipo: "Jarabe", precio: 2.8 },
-  ],
-  "Gripe y resfriado": [
-    { id: "g1", nombre: "Frenadol", marca: "Bayer", tipo: "Sobres", precio: 6.0 },
-    { id: "g2", nombre: "Vick Jarabe", marca: "Vick", tipo: "Jarabe", precio: 5.5 },
-    { id: "g3", nombre: "Couldina", marca: "Bial", tipo: "Sobres", precio: 5.8 },
-    { id: "g4", nombre: "Gripavick", marca: "Vick", tipo: "Jarabe", precio: 5.2 },
-    { id: "g5", nombre: "Next", marca: "Next", tipo: "Cápsula", precio: 6.3 },
-  ],
-  "Dieta y nutrición": [
-    { id: "d1", nombre: "Multivitamínico", marca: "Centrum", tipo: "Tableta", precio: 7.5 },
-    { id: "d2", nombre: "Omega 3", marca: "Solgar", tipo: "Cápsula", precio: 9.5 },
-    { id: "d3", nombre: "Vitamina C", marca: "Redoxon", tipo: "Efervescente", precio: 6.5 },
-    { id: "d4", nombre: "Colágeno", marca: "AML", tipo: "Polvo", precio: 10.0 },
-    { id: "d5", nombre: "Magnesio", marca: "Ana María", tipo: "Tableta", precio: 8.0 },
-  ],
-  "Cuidado del cabello y piel": [
-    { id: "c1", nombre: "Champú Anticaspa", marca: "H&S", tipo: "Líquido", precio: 6.5 },
-    { id: "c2", nombre: "Crema Hidratante", marca: "Nivea", tipo: "Crema", precio: 4.2 },
-    { id: "c3", nombre: "Protector Solar", marca: "Isdin", tipo: "Crema", precio: 12.0 },
-    { id: "c4", nombre: "Aloe Vera", marca: "Babaria", tipo: "Gel", precio: 5.0 },
-    { id: "c5", nombre: "Aceite Capilar", marca: "Pantene", tipo: "Aceite", precio: 6.8 },
-  ],
-  "Salud bucal": [
-    { id: "s1", nombre: "Pasta Dental", marca: "Colgate", tipo: "Crema", precio: 3.0 },
-    { id: "s2", nombre: "Enjuague Bucal", marca: "Listerine", tipo: "Líquido", precio: 4.8 },
-    { id: "s3", nombre: "Hilo Dental", marca: "Oral-B", tipo: "Rollo", precio: 2.5 },
-    { id: "s4", nombre: "Cepillo Dental", marca: "Oral-B", tipo: "Manual", precio: 3.2 },
-    { id: "s5", nombre: "Blanqueador Dental", marca: "Vitis", tipo: "Gel", precio: 7.0 },
-  ],
-  "Primeros auxilios": [
-    { id: "p1", nombre: "Agua Oxigenada", marca: "Genérico", tipo: "Líquido", precio: 2.0 },
-    { id: "p2", nombre: "Alcohol 70%", marca: "Acofar", tipo: "Líquido", precio: 2.8 },
-    { id: "p3", nombre: "Vendas", marca: "Hansaplast", tipo: "Pack", precio: 3.5 },
-    { id: "p4", nombre: "Tiritas", marca: "Hansaplast", tipo: "Pack", precio: 3.0 },
-    { id: "p5", nombre: "Suero Fisiológico", marca: "Monodosis", tipo: "Ampolla", precio: 4.0 },
-  ],
-};
-
-/* =======================
-  COMPONENT
-======================= */
 function Hall() {
+  const { dni, medicamentosReceta, tieneReceta: tieneRecetaParam } = useLocalSearchParams();
+
   const [showDrawer, setShowDrawer] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [sinReceta, setSinReceta] = useState<Product[]>([]);
+  const [sinReceta, setSinReceta] = useState<Medicamento[]>([]);
+  const [conReceta, setConReceta] = useState<Medicamento[]>([]);
   const [search, setSearch] = useState("");
+  const [medicamentosBD, setMedicamentosBD] = useState<Medicamento[]>([]);
+  const [medicamentosRecetaBD, setMedicamentosRecetaBD] = useState<Medicamento[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [medicamentosRecetaSeleccionados, setMedicamentosRecetaSeleccionados] = useState<Set<string>>(new Set());
 
+  const tieneReceta = tieneRecetaParam === "true";
+
+  console.log("💊 medicamentosReceta (parámetro):", medicamentosReceta);
+  console.log("📋 tieneReceta:", tieneReceta);
+
+  // ✅ Cargar medicamentos al montar
+  useEffect(() => {
+    const fetchMedicamentos = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        console.log("🚀 Iniciando carga de medicamentos...");
+
+        // 1. Obtener medicamentos SIN receta
+        const dataSinReceta = await medicamentosService.obtenerSinReceta();
+        console.log("✅ Medicamentos sin receta cargados:", dataSinReceta.length);
+        setMedicamentosBD(dataSinReceta);
+
+        // 2. ✅ Obtener medicamentos CON receta si tiene receta
+        if (tieneReceta && medicamentosReceta) {
+          console.log("📋 Procesando medicamentos con receta...");
+          console.log("   medicamentosReceta:", medicamentosReceta);
+
+          // Parsear nombres de medicamentos con receta
+          const nombresReceta = typeof medicamentosReceta === 'string'
+            ? medicamentosReceta
+                .split(",")
+                .map(m => m.trim())
+                .filter(m => m !== "")
+            : [];
+
+          console.log("   Nombres parseados:", nombresReceta);
+
+          if (nombresReceta.length > 0) {
+            // Obtener TODOS los medicamentos
+            const todosMedicamentos = await medicamentosService.obtenerTodos();
+            console.log("   Total medicamentos en BD:", todosMedicamentos.length);
+
+            // Filtrar por nombre (case-insensitive)
+            const dataConReceta = todosMedicamentos.filter(med => {
+              const encontrado = nombresReceta.some(nombre =>
+                med.nombre.toLowerCase().trim() === nombre.toLowerCase().trim()
+              );
+              
+              if (encontrado) {
+                console.log(`   ✅ Encontrado: ${med.nombre}`);
+              }
+              
+              return encontrado;
+            });
+
+            console.log("✅ Medicamentos con receta encontrados:", dataConReceta.length);
+            setMedicamentosRecetaBD(dataConReceta);
+          } else {
+            console.log("⚠️ No hay nombres de medicamentos con receta");
+            setMedicamentosRecetaBD([]);
+          }
+        } else {
+          console.log("⚠️ No tiene receta activa o sin medicamentosReceta");
+          setMedicamentosRecetaBD([]);
+        }
+
+      } catch (err: any) {
+        console.error("❌ Error:", err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMedicamentos();
+  }, [tieneReceta, medicamentosReceta]);
+
+  const medicamentosPorFamilia: Record<string, Medicamento[]> = medicamentosBD.reduce(
+    (acc, med) => {
+      const familia = med.familia || "Otros";
+      if (!acc[familia]) acc[familia] = [];
+      acc[familia].push(med);
+      return acc;
+    },
+    {} as Record<string, Medicamento[]>
+  );
+
+  // ✅ Remover producto del carrito Y devolver a disponibles
   const handleRemoveProducto = (id: string) => {
-    setSinReceta((prev) => prev.filter((item) => item.id !== id));
+    // Buscar si es de receta o sin receta
+    const medicamentoConReceta = conReceta.find(m => m.id === id);
+    const medicamentoSinReceta = sinReceta.find(m => m.id === id);
+
+    if (medicamentoConReceta) {
+      // ✅ Remover de carrito con receta
+      setConReceta((prev) => prev.filter((item) => item.id !== id));
+      // ✅ Remover del Set de seleccionados
+      setMedicamentosRecetaSeleccionados((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+      console.log("🗑️ Medicamento con receta removido:", medicamentoConReceta.nombre);
+    } else if (medicamentoSinReceta) {
+      // ✅ Remover de carrito sin receta
+      setSinReceta((prev) => prev.filter((item) => item.id !== id));
+      console.log("🗑️ Medicamento sin receta removido:", medicamentoSinReceta.nombre);
+    }
+  };
+
+  // ✅ Agregar medicamento CON receta (máximo una vez)
+  const handleAgregarConReceta = (med: Medicamento) => {
+    if (!medicamentosRecetaSeleccionados.has(med.id)) {
+      setConReceta((prev) => [...prev, med]);
+      setMedicamentosRecetaSeleccionados((prev) => new Set([...prev, med.id]));
+      console.log("✅ Medicamento con receta agregado:", med.nombre);
+    }
   };
 
   const toggleCategory = (categoria: string) => {
@@ -96,18 +144,26 @@ function Hall() {
     }));
   };
 
-  const totalSinReceta = sinReceta.reduce(
-    (total, item) => total + item.precio,
-    0
-  );
+  const totalSinReceta = sinReceta.reduce((total, item) => total + item.precio, 0);
+  const totalConReceta = conReceta.reduce((total, item) => total + item.precio, 0);
+  const totalGeneral = totalSinReceta + totalConReceta;
 
-  const renderItem = ({ item }: { item: Product }) => (
+  const carrito = [...conReceta, ...sinReceta];
+
+  const renderItem = ({ item }: { item: Medicamento }) => (
     <View style={styles.itemCard}>
-      <Image source={{ uri: "https://via.placeholder.com/70" }} style={styles.itemImage} />
+      <Image
+        source={{
+          uri: item.img_medicamento?.trim()
+            ? item.img_medicamento
+            : "https://via.placeholder.com/70",
+        }}
+        style={styles.itemImage}
+      />
       <View style={styles.itemInfo}>
         <Text style={styles.itemName}>{item.nombre}</Text>
         <Text style={styles.itemText}>{item.marca}</Text>
-        <Text style={styles.itemText}>{item.tipo}</Text>
+        <Text style={styles.itemText}>{item.familia}</Text>
         <Text style={styles.itemPrice}>{item.precio.toFixed(2)} €</Text>
       </View>
       <Pressable onPress={() => handleRemoveProducto(item.id)}>
@@ -119,31 +175,74 @@ function Hall() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={sinReceta}
+        data={carrito}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListHeaderComponent={
           <>
-            {/* CON RECETA */}
-            <Pressable
-              style={styles.card}
-              onPress={() => router.push("/screens/IngresarCartilla")}
-            >
-              <View style={[styles.cardHeader, styles.flecha]}>
-                <View>
-                  <Text style={styles.cardTitle}>CON RECETA</Text>
-                  <Text style={styles.subText}>¿Tienes receta?</Text>
+            {/* ✅ CON RECETA */}
+            {tieneReceta && medicamentosRecetaBD.length > 0 ? (
+              <View style={[styles.card, { paddingBottom: 0 }]}>
+                <View style={styles.cardHeader}>
+                  <View>
+                    <Text style={styles.cardTitle}>CON RECETA</Text>
+                    <Text style={styles.subText}>Medicamentos recetados</Text>
+                  </View>
                 </View>
 
-                <MaterialIcons name="launch" size={24} color="#fff" />
+                {/* Mostrar medicamentos con receta DISPONIBLES (no seleccionados) */}
+                {medicamentosRecetaBD
+                  .filter(med => !medicamentosRecetaSeleccionados.has(med.id))
+                  .length > 0 ? (
+                  <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+                    {medicamentosRecetaBD
+                      .filter(med => !medicamentosRecetaSeleccionados.has(med.id))
+                      .map((med) => (
+                        <Pressable
+                          key={med.id}
+                          style={styles.medicamentCard}
+                          onPress={() => {
+                            handleAgregarConReceta(med);
+                          }}
+                        >
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.medicamentName}>{med.nombre}</Text>
+                            <Text style={styles.medicamentSubtext}>
+                              {med.marca} • {med.familia}
+                            </Text>
+                          </View>
+                          <Text style={styles.medicamentPrice}>
+                            {med.precio.toFixed(2)} €
+                          </Text>
+                        </Pressable>
+                      ))}
+                  </View>
+                ) : (
+                  <View style={[styles.emptyContainer, { paddingHorizontal: 16, paddingVertical: 24 }]}>
+                    <MaterialIcons name="shopping-cart" size={48} color="#999" />
+                    <Text style={styles.emptyText}>
+                      Todos los medicamentos han sido agregados al carrito
+                    </Text>
+                  </View>
+                )}
               </View>
-
-              {receta.length === 0 && (
+            ) : (
+              <Pressable
+                style={styles.card}
+                onPress={() => router.push("/screens/IngresarCartilla")}
+              >
+                <View style={[styles.cardHeader, styles.flecha]}>
+                  <View>
+                    <Text style={styles.cardTitle}>CON RECETA</Text>
+                    <Text style={styles.subText}>¿Tienes receta?</Text>
+                  </View>
+                  <MaterialIcons name="launch" size={24} color="#fff" />
+                </View>
                 <Text style={styles.mediumText}>
                   No hay productos con receta disponibles
                 </Text>
-              )}
-            </Pressable>
+              </Pressable>
+            )}
 
             {/* SIN RECETA HEADER */}
             <View style={styles.card2}>
@@ -161,21 +260,32 @@ function Hall() {
           </>
         }
         ListFooterComponent={
-          <Text style={styles.totalText}>
-            Total: {totalSinReceta.toFixed(2)} €
-          </Text>
+          <View style={{ paddingVertical: 20 }}>
+            <Text style={styles.totalText}>
+              Total: {totalGeneral.toFixed(2)} €
+            </Text>
+          </View>
         }
-        contentContainerStyle={{ paddingBottom: 90 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
 
       {/* BOTONES FIJOS ABAJO */}
       <View style={styles.bottomButtons}>
-        <Pressable style={styles.bottomButton} onPress={() => router.push("/screens/FormaPago")}>
-            <Text style={styles.bottomButtonText}>COMPRAR</Text>
+        <Pressable
+          style={[styles.bottomButton, carrito.length === 0 && { opacity: 0.5 }]}
+          onPress={() => router.push({
+            pathname: "/screens/FormaPago",
+            params: { total: totalGeneral.toFixed(2) },
+          })}
+          disabled={carrito.length === 0}
+        >
+          <Text style={styles.bottomButtonText}>COMPRAR</Text>
         </Pressable>
-
-        <Pressable style={styles.bottomButtonVolver} onPress={() => router.push("/screens/Home")}>
-            <Text style={styles.bottomButtonText}>CANCELAR</Text>
+        <Pressable
+          style={styles.bottomButtonVolver}
+          onPress={() => router.push("/screens/Home")}
+        >
+          <Text style={styles.bottomButtonText}>CANCELAR</Text>
         </Pressable>
       </View>
 
@@ -183,7 +293,6 @@ function Hall() {
       <Modal visible={showDrawer} transparent animationType="slide">
         <Pressable style={styles.overlay} onPress={() => setShowDrawer(false)}>
           <Pressable style={styles.drawer}>
-            {/* BUSCADOR */}
             <TextInput
               placeholder="Buscar medicamento..."
               value={search}
@@ -191,49 +300,62 @@ function Hall() {
               style={styles.searchInput}
             />
 
-            <ScrollView>
-              {Object.entries(medicamentosPorCategoria).map(([categoria, meds]) => {
-                const filtrados = meds.filter((m) =>
-                  m.nombre.toLowerCase().includes(search.toLowerCase())
-                );
-                if (filtrados.length === 0) return null;
+            {loading ? (
+              <ActivityIndicator size="large" color="#ffffff" style={{ marginTop: 20 }} />
+            ) : error ? (
+              <Text style={{ color: "#E63946", textAlign: "center", marginTop: 20 }}>
+                {error}
+              </Text>
+            ) : (
+              <ScrollView>
+                {Object.entries(medicamentosPorFamilia).map(([familia, meds]) => {
+                  const filtrados = meds.filter((m) =>
+                    m.nombre.toLowerCase().includes(search.toLowerCase())
+                  );
+                  if (filtrados.length === 0) return null;
+                  const isExpanded = expandedCategories[familia];
 
-                const isExpanded = expandedCategories[categoria];
+                  return (
+                    <View key={familia}>
+                      <Pressable
+                        onPress={() => toggleCategory(familia)}
+                        style={styles.drawerCategoryButton}
+                      >
+                        <Text style={styles.drawerCategory}>{familia}</Text>
+                        <MaterialIcons
+                          name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                          size={20}
+                          color="#ffffff"
+                        />
+                      </Pressable>
 
-                return (
-                  <View key={categoria}>
-                    {/* CATEGORIA */}
-                    <Pressable
-                      onPress={() => toggleCategory(categoria)}
-                      style={styles.drawerCategoryButton}
-                    >
-                      <Text style={styles.drawerCategory}>{categoria}</Text>
-                      <MaterialIcons
-                        name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-                        size={20}
-                        color="#ffffff"
-                      />
-                    </Pressable>
-
-                    {/* MEDICAMENTOS EXPANDIDOS */}
-                    {isExpanded &&
-                      filtrados.map((med) => (
-                        <Pressable
-                          key={med.id}
-                          style={styles.drawerItem}
-                          onPress={() => {
-                            setSinReceta((prev) => [...prev, med]);
-                            setShowDrawer(false);
-                            setSearch("");
-                          }}
-                        >
-                          <Text style={styles.drawerItem}>{med.nombre}</Text>
-                        </Pressable>
-                      ))}
-                  </View>
-                );
-              })}
-            </ScrollView>
+                      {isExpanded &&
+                        filtrados.map((med) => (
+                          <Pressable
+                            key={med.id}
+                            style={styles.medicamentCard}
+                            onPress={() => {
+                              setSinReceta((prev) => [...prev, med]);
+                              setShowDrawer(false);
+                              setSearch("");
+                            }}
+                          >
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.medicamentName}>{med.nombre}</Text>
+                              <Text style={styles.medicamentSubtext}>
+                                {med.marca} • {med.familia}
+                              </Text>
+                            </View>
+                            <Text style={styles.medicamentPrice}>
+                              {med.precio.toFixed(2)} €
+                            </Text>
+                          </Pressable>
+                        ))}
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            )}
           </Pressable>
         </Pressable>
       </Modal>

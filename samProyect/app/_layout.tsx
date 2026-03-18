@@ -3,10 +3,10 @@ import { Stack, usePathname } from "expo-router";
 import { View, Image } from "react-native";
 import { styles } from "../styles/LayoutStyle";
 
-const SAM_LOGO = require("../assets/images/sam_logo.png");
-
 // HEADER APP BAR 
 function RootLayout() {
+
+    const SAM_LOGO = require("../assets/images/sam_logo.png");
 
     const pathname = usePathname();
 

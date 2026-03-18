@@ -5,15 +5,15 @@ export const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: theme.spacing(2),
-        justifyContent: "center",
-        alignItems: "center",
         backgroundColor: theme.colors.background,
+        justifyContent: "center",  // ✅ CAMBIO: center para centrar todo
+        alignItems: "center",
     },
     title: {
         fontSize: theme.fontSize.title,
         fontWeight: "bold",
         color: theme.colors.primary,
-        marginVertical: theme.spacing(3),
+        marginBottom: theme.spacing(3),  // ✅ CAMBIO: marginBottom en lugar de marginVertical
         textAlign: "center",
     },
     button: {
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         paddingVertical: theme.spacing(2),
         borderRadius: 30,
-        marginBottom: theme.spacing(2),
+        marginBottom: theme.spacing(1),
         alignItems: "center",
         justifyContent: "center",
     },
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         paddingVertical: theme.spacing(2),
         borderRadius: 30,
-        marginBottom: theme.spacing(2),
+        marginBottom: theme.spacing(1),
         alignItems: "center",
         justifyContent: "center",
     },
@@ -47,10 +47,10 @@ export const styles = StyleSheet.create({
     },
 
     formaPagoContainer: {
-        flex: 1,
         flexDirection: "column",
-        gap: 16,
-        justifyContent: "center",
+        gap: 8,
+        justifyContent: "center",  // ✅ CAMBIO: center en lugar de flex-start
         alignItems: "center",
+        width: "100%",
     }
 });

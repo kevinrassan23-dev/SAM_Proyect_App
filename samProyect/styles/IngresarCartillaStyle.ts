@@ -40,6 +40,17 @@ export const styles = StyleSheet.create({
         justifyContent: "center",
     },
 
+    buttonVolver: {
+        backgroundColor: theme.colors.error,
+        flexDirection: "row",
+        width: "80%",
+        paddingVertical: theme.spacing(2),
+        borderRadius: 30,
+        marginBottom: theme.spacing(1),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
     buttonText: {
         color: theme.colors.textSecondary,
         fontSize: theme.fontSize.normal,

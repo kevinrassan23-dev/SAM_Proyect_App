@@ -31,6 +31,17 @@ export const styles = StyleSheet.create({
         justifyContent: "center",
     },
 
+    buttonVolver: {
+        backgroundColor: theme.colors.error,
+        flexDirection: "row",
+        width: "80%",
+        paddingVertical: theme.spacing(2),
+        borderRadius: 30,
+        marginBottom: theme.spacing(1),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
     buttonText: {
         color: theme.colors.textSecondary,
         fontSize: theme.fontSize.large,
@@ -51,6 +62,13 @@ export const styles = StyleSheet.create({
         marginBottom: theme.spacing(2),
     },
 
+    error: {
+        color: theme.colors.error,
+        fontSize: theme.fontSize.small,
+        marginBottom: theme.spacing(1),
+        textAlign: "center",
+    },
+
     view1: {
         height: 16
     },
@@ -59,7 +77,7 @@ export const styles = StyleSheet.create({
         height: 32
     },
 
-    VerificacionChoiceContainer: {
+    VerificacionMovilContainer: {
         flexDirection: "column",
         gap: 16,
         justifyContent: "center",

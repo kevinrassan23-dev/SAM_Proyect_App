@@ -218,4 +218,48 @@ export const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 16,
     },
+
+    medicamentCard: {
+        backgroundColor: "#FFA500",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+        flexDirection: "row" as const,
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+
+    medicamentName:  {
+        fontSize: 14,
+        fontWeight: "600" as const,
+        color: "#000",
+        marginBottom: 4,
+    },
+
+    medicamentSubtext:  {
+        fontSize: 12,
+        color: "#333",
+        marginBottom: 4,
+    },
+
+    medicamentPrice: {
+        fontSize: 14,
+        fontWeight: "bold" as const,
+        color: "#000",
+        marginLeft: 12,
+    },
+
+    emptyContainer: {
+        alignItems: "center" as const,
+        justifyContent: "center",
+        paddingVertical: 24,
+    },
+
+    emptyText:  {
+        fontSize: 13,
+        color: "#999",
+        marginTop: 10,
+        textAlign: "center" as const,
+        maxWidth: 200,
+    },
 });

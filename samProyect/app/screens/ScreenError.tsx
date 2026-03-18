@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import LottieView from "lottie-react-native";
 import { styles } from "../../styles/ScreenErrorStyle";
@@ -15,6 +15,8 @@ function ScreenError() {
                 return "Solicitud no válida. Por favor, revise los datos de su pedido nuevamente.";
             case "404":
                 return "El sitio solicitado no se encuentra.";
+            case "406":
+                return "El servicio rechazó esta solicitud.";
             case "408":
                 return "La solicitud tardó demasiado. Inténtelo de nuevo.";
             case "409":
@@ -54,7 +56,7 @@ function ScreenError() {
             {/* Código de error */}
             <Text style={styles.codigo}>{codigo || "ERROR"}</Text>
 
-            {/* Mensaje amigable */}
+            {/* Mensaje de error */}
             <Text style={styles.mensaje}>{getErrorMessage()}</Text>
 
             {/* Referencia para soporte */}
