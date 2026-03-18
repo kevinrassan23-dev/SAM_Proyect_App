@@ -6,7 +6,11 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: theme.spacing(3),
         paddingVertical: theme.spacing(4),
+<<<<<<< HEAD
         justifyContent: "flex-start",
+=======
+        justifyContent: "space-between",
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         backgroundColor: theme.colors.background,
     },
 
@@ -24,8 +28,12 @@ export const styles = StyleSheet.create({
     },
 
     headerSection: {
+<<<<<<< HEAD
         marginBottom: theme.spacing(3),
         paddingTop: theme.spacing(2),
+=======
+        marginBottom: theme.spacing(1),
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
     },
 
     content: {
@@ -50,7 +58,11 @@ export const styles = StyleSheet.create({
         fontSize: 32,
         color: theme.colors.primary,
         fontWeight: "800",
+<<<<<<< HEAD
         marginBottom: theme.spacing(2),
+=======
+        marginBottom: theme.spacing(3),
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         textAlign: "center",
         letterSpacing: -0.5,
     },
@@ -61,7 +73,11 @@ export const styles = StyleSheet.create({
         padding: theme.spacing(3.5),
         marginBottom: theme.spacing(4),
         borderLeftWidth: 5,
+<<<<<<< HEAD
         borderLeftColor: theme.colors.secondary,
+=======
+        borderLeftColor: theme.colors.primary,
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         elevation: 2,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
@@ -74,12 +90,20 @@ export const styles = StyleSheet.create({
         color: "#888",
         marginBottom: theme.spacing(1),
         fontWeight: "600",
+<<<<<<< HEAD
+=======
+        textTransform: "uppercase",
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         letterSpacing: 1,
     },
 
     totalAmount: {
         fontSize: 32,
+<<<<<<< HEAD
         color: theme.colors.secondary,
+=======
+        color: theme.colors.primary,
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         fontWeight: "700",
     },
 
@@ -130,8 +154,12 @@ export const styles = StyleSheet.create({
     buttons: {
         flexDirection: "column",
         justifyContent: "flex-end",
+<<<<<<< HEAD
         gap: theme.spacing(2),  // ✅ REDUCIDO: de spacing(2.5) a spacing(2)
         marginTop: theme.spacing(3),
+=======
+        gap: theme.spacing(2.5),
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
     },
 
     button: {
@@ -148,6 +176,7 @@ export const styles = StyleSheet.create({
         shadowRadius: 5,
     },
 
+<<<<<<< HEAD
     buttonVolver: {
         width: "100%",
         backgroundColor: theme.colors.error,
@@ -164,6 +193,10 @@ export const styles = StyleSheet.create({
 
     buttonSecondary: {
         backgroundColor: theme.colors.error,
+=======
+    buttonSecondary: {
+        backgroundColor: "#f0f0f0",
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         elevation: 2,
         shadowOpacity: 0.08,
     },
@@ -176,6 +209,10 @@ export const styles = StyleSheet.create({
     },
 
     buttonTextSecondary: {
+<<<<<<< HEAD
         color: theme.colors.textSecondary,
+=======
+        color: theme.colors.primary,
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
     },
 });

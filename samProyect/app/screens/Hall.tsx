@@ -271,6 +271,7 @@ function Hall() {
 
       {/* BOTONES FIJOS ABAJO */}
       <View style={styles.bottomButtons}>
+<<<<<<< HEAD
         <Pressable
           style={[styles.bottomButton, carrito.length === 0 && { opacity: 0.5 }]}
           onPress={() => router.push({
@@ -280,6 +281,13 @@ function Hall() {
           disabled={carrito.length === 0}
         >
           <Text style={styles.bottomButtonText}>COMPRAR</Text>
+=======
+        <Pressable style={styles.bottomButton} onPress={() => router.push({
+          pathname: "/screens/FormaPago",
+          params: { total: totalSinReceta.toFixed(2) }
+        })}>
+            <Text style={styles.bottomButtonText}>COMPRAR</Text>
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
         </Pressable>
         <Pressable
           style={styles.bottomButtonVolver}

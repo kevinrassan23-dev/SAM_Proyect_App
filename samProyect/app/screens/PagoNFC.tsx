@@ -2,6 +2,10 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { View, Image, Pressable } from 'react-native';
 import { Text } from 'react-native-paper';
+<<<<<<< HEAD
+=======
+import customTheme from '../../theme/Theme';
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
 import { useNavigation } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { styles } from "../../styles/PagoNFCStyle";
@@ -29,11 +33,19 @@ function PagoNFC() {
   };
 
   const handleVolver = () => {
+<<<<<<< HEAD
     router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
+=======
+    router.push({ pathname: "/screens/FormaPago" });
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
   };
 
   return (
     <View style={styles.container}>
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <Text style={styles.titleText}>Pago con NFC</Text>
+      </View>
 
       {/* Content Section */}
       <View style={styles.content}>
@@ -42,8 +54,13 @@ function PagoNFC() {
           <>
             {/* Total Card */}
             <View style={styles.totalCard}>
+<<<<<<< HEAD
               <Text style={styles.totalLabel}>Total a pagar</Text>
               <Text style={styles.totalAmount}>{TOTAL.toFixed(2)}€</Text>
+=======
+              <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
+              <Text style={styles.totalAmount}>${TOTAL.toFixed(2)}</Text>
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
             </View>
 
             {/* NFC Image */}

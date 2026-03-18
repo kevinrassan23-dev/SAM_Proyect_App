@@ -16,14 +16,22 @@ function PagoEfectivo() {
   const handleAceptar = () => {
     const value = parseFloat(importe.replace(',', '.')) || 0;
     if (value >= TOTAL) {
+<<<<<<< HEAD
       router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "efectivo" } });
+=======
+      router.push({ pathname: "/screens/Confirmacion" });
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
     } else {
       Alert.alert('Pago insuficiente', 'No se puede procesar el pago: el importe es menor al total.');
     }
   };
 
   const handleVolver = () => {
+<<<<<<< HEAD
     router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
+=======
+    router.push({ pathname: "/screens/FormaPago" });
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
   };
 
   return (
@@ -35,8 +43,13 @@ function PagoEfectivo() {
 
       {/* Total Card */}
       <View style={styles.totalCard}>
+<<<<<<< HEAD
         <Text style={styles.totalLabel}>Total a pagar</Text>
         <Text style={styles.totalAmount}>{TOTAL.toFixed(2)}€</Text>
+=======
+        <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
+        <Text style={styles.totalAmount}>${TOTAL.toFixed(2)}</Text>
+>>>>>>> cfc6748d6f7a3d8491abbaaa595b70b1e527d357
       </View>
 
       {/* Form Section */}
