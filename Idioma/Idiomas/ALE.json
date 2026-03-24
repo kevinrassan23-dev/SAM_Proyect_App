@@ -1,0 +1,94 @@
+{
+    "Home": {
+        "ACCEDER": "BEGINNEN"
+    },
+    "Hall": {
+        "CONRECETA": "MIT REZEPT",
+        "SINRECETA": "OHNE REZEPT",
+        "MEDICAMENTOSRECETADOS": "Verschriebene Medikamente",
+        "MEDICAMENTOSAGREGADOS": "Alle Medikamente wurden dem Warenkorb hinzugefügt",
+        "TIENESRECETA": "Haben Sie ein Rezept?",
+        "NOHAYRECETA": "Keine Rezeptprodukte verfügbar",
+        "FILTRAR": "Medikamente filtern",
+        "BUSCAR": "Medikament suchen...",
+        "COMPRAR": "KAUFEN",
+        "CANCELAR": "ABBRECHEN",
+        "TOTAL": "Gesamt"
+    },
+    "FormaPago": {
+        "SELCMETPAG": "Wählen Sie eine Zahlungsmethode",
+        "EFECTIVO": "BARGELD",
+        "PAGONFC": "NFC-ZAHLUNG",
+        "TARJETA": "KARTE",
+        "VOLVER": "ZURÜCK ZUM GESCHÄFT",
+        "CANCELAR": "BESTELLUNG STORNIEREN"
+    },
+    "PagoEfectivo": {
+        "ALERT1": "Unzureichende Zahlung",
+        "ALERT2": "Die Zahlung kann nicht verarbeitet werden: Der Betrag ist geringer als der Gesamtbetrag.",
+        "EFECTIVO": "Barzahlung",
+        "TOTAL": "ZU ZAHLENDER BETRAG",
+        "INGRESAR": "Geben Sie den zu zahlenden Betrag ein",
+        "ACEPTAR": "BESTÄTIGEN",
+        "VOLVER": "ZURÜCK"
+    },
+    "PagoNFC": {
+        "PAGONFC": "NFC-Zahlung",
+        "TOTAL": "ZU ZAHLENDER BETRAG",
+        "REDIRIGIR": "Weiterleitung in wenigen Sekunden...",
+        "ACERCAR": "Halten Sie Ihr Gerät an das Terminal, um zu bezahlen",
+        "ACEPTADO": "Zahlung akzeptiert!",
+        "ESCANEAR": "SCANNEN",
+        "VOLVER": "ZURÜCK"
+    },
+    "PagoTarjeta": {
+        "ALERT1": "Unvollständige PIN",
+        "ALERT2": "Bitte geben Sie genau 4 Ziffern ein",
+        "TARJETA": "Kartenzahlung",
+        "TOTAL": "ZU ZAHLENDER BETRAG",
+        "PIN": "Geben Sie Ihre Karten-PIN ein",
+        "ACEPTAR": "BESTÄTIGEN",
+        "VOLVER": "ZURÜCK"
+    },
+    "Confirmacion": {
+        "DESCONOCIDO": "Unbekannt",
+        "ERROR": "Die Bestellung konnte nicht abgeschlossen werden",
+        "GENERAR": "Bestellung wird generiert...",
+        "GENERADO": "✅ Bestellung erfolgreich generiert",
+        "PROCESANDO": "Bestellung wird verarbeitet...",
+        "PROCESADO": "✅ Bestellung erfolgreich verarbeitet",
+        "LISTO": "Bestellung bereit zur Übergabe...",
+        "ENTREGADO": "Bestellung übergeben",
+        "ESTADO": "Bestellstatus:",
+        "ID": "Bestell-ID:",
+        "VOLVER": "Zurück zum Start"
+    },
+    "ScreenError": {
+        "400": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Bestelldaten erneut.",
+        "404": "Die angeforderte Seite wurde nicht gefunden.",
+        "406": "Der Dienst hat diese Anfrage abgelehnt.",
+        "408": "Die Anfrage hat zu lange gedauert. Bitte versuchen Sie es erneut.",
+        "409": "Es gab einen Konflikt mit Ihrer Bestellanfrage.",
+        "422": "Die Daten stimmen nicht überein. Bitte überprüfen Sie die eingegebenen Informationen erneut.",
+        "429": "Server überlastet. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+        "500": "Interner Serverfehler. Bitte versuchen Sie es später erneut.",
+        "502": "Verbindungsfehler mit dem Server.",
+        "503": "Dienst vorübergehend nicht verfügbar.",
+        "504": "Zeitüberschreitung für diese Anfrage.",
+        "ERRORINES": "Ein unerwarteter Fehler ist aufgetreten.",
+        "ERROR": "FEHLER",
+        "REFERENCE": "Referenz",
+        "N/A": "N/A",
+        "VOLVER": "ZURÜCK"
+    },
+    "IngresarCartilla": {
+        "ERROR1": "Bitte geben Sie eine Krankenkassennummer ein",
+        "ERROR2": "Krankenkassennummer nicht gefunden, bitte geben Sie eine gültige Nummer ein",
+        "ERROR3": "Diese Krankenkassennummer ist derzeit nicht aktiv",
+        "INGRESAR": "Geben Sie Ihre Krankenkassennummer ein",
+        "NºCARTILLA": "Krankenkassennummer",
+        "BUSCANDO": "Suche läuft...",
+        "ACEPTAR": "BESTÄTIGEN",
+        "VOLVER": "ZURÜCK ZUM GESCHÄFT"
+    }
+}
