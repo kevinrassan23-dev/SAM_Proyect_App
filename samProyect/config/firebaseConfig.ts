@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -10,17 +12,10 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-console.log("🔍 Firebase Config:");
-console.log("✅ PROJECT_ID:", firebaseConfig.projectId ? "ENCONTRADO" : "❌ NO ENCONTRADO");
-console.log("✅ API_KEY:", firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 20)}...` : "❌ NO ENCONTRADO");
-console.log("✅ AUTH_DOMAIN:", firebaseConfig.authDomain ? "ENCONTRADO" : "❌ NO ENCONTRADO");
-
-if (!firebaseConfig.projectId || !firebaseConfig.apiKey) {
-  throw new Error("❌ FALTAN VARIABLES DE ENTORNO EN .env.local");
-}
-
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
 
-console.log("✅ Firebase inicializado correctamente");
-console.log("📍 Proyecto:", firebaseConfig.projectId);
+export const db = getFirestore(app);
+export const functions = getFunctions(app, 'europe-west1');
+export const auth = getAuth(app);
+
+export { firebaseConfig };

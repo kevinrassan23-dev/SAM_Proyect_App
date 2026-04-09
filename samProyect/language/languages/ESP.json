@@ -1,0 +1,86 @@
+{
+    "Home": {
+        "ACCEDER": "COMENZAR"
+    },
+    "Hall": {
+        "CONRECETA": "CON RECETA",
+        "SINRECETA": "SIN RECETA",
+        "MEDICAMENTOSRECETADOS": "Medicamentos recetados",
+        "MEDICAMENTOSAGREGADOS": "Todos los medicamentos han sido agregados al carrito",
+        "TIENESRECETA": "¿Tienes receta?",
+        "NOHAYRECETA": "No hay productos con receta disponibles",
+        "FILTRAR": "Filtrar medicamentos",
+        "BUSCAR": "Buscar medicamento...",
+        "COMPRAR": "COMPRAR",
+        "CANCELAR": "CANCELAR",
+        "TOTAL": "Total",
+        "CARROAÑADIR": "Añadir al carro",
+        "ARTICULOS": "artículo(s)",
+        "GRIPEYRESFRIADO": "Gripe Y Resfriado",
+        "ANALGÉSICOS": "Analgésicos",
+        "ALÉRGENOS": "Alérgenos",
+        "DIETAYNUTRICIÓN": "Dieta Y Nutrición",
+        "CUIDADODELCABELLOYPIEL": "Cuidado Del Cabello Y Piel",
+        "SALUDBUSCAL": "Salud Buscal",
+        "PRIMEROSAUXILIOS": "Primeros Auxilios"
+    },
+    "FormaPago": {
+        "SELCMETPAG": "Selecciona un método de pago",
+        "EFECTIVO": "EFECTIVO",
+        "PAGONFC": "PAGO NFC",
+        "TARJETA": "TARJETA",
+        "VOLVER": "VOLVER A LA TIENDA",
+        "CANCELAR": "CANCELAR PEDIDO"
+    },
+    "PagoEfectivo": {
+        "ALERT1": "Pago insuficiente",
+        "ALERT2": "No se puede procesar el pago: el importe es menor al total.",
+        "EFECTIVO": "Pago en Efectivo",
+        "TOTAL": "TOTAL A PAGAR",
+        "INGRESAR": "Ingrese el monto a pagar",
+        "ACEPTAR": "ACEPTAR",
+        "VOLVER": "VOLVER"
+    },
+    "PagoNFC": {
+        "PAGONFC": "Pago con NF",
+        "TOTAL": "TOTAL A PAGAR",
+        "REDIRIGIR": "Redirigiendo en unos segundos...",
+        "ACERCAR": "Acerque su dispositivo al terminal para pagar",
+        "ACEPTADO": "¡Pago Aceptado!",
+        "ESCANEAR": "ESCANEAR",
+        "VOLVER": "VOLVER"
+    },
+    "PagoTarjeta": {
+        "ALERT1": "PIN incompleto",
+        "ALERT2": "Por favor, ingrese exactamente 4 dígitos",
+        "TARJETA": "Pago con Tarjeta",
+        "TOTAL": "TOTAL A PAGAR",
+        "PIN": "Ingrese el PIN de su tarjeta",
+        "ACEPTAR": "ACEPTAR",
+        "VOLVER": "VOLVER"
+    },
+    "Confirmacion": {
+        "DESCONOCIDO": "Desconocido",
+        "ERROR": "No se pudo completar el pedido",
+        "GENERAR": "Generando pedido...",
+        "GENERADO": "✅ Pedido generado correctamente",
+        "PROCESANDO": "Procesando pedido...",
+        "PROCESADO": "✅ Pedido procesado correctamente",
+        "DEVOLVER": "💰 Devolviendo ",
+        "LISTO": "Pedido listo para entregar...",
+        "ENTREGADO": "Pedido entregado",
+        "ESTADO": "Estado del pedido:",
+        "ID": "ID del pedido:",
+        "VOLVER": "Volver a inicio"
+    },
+    "IngresarCartilla": {
+        "ERROR1": "Por favor, ingrese un número de cartilla",
+        "ERROR2": "Cartilla no encontrada, por favor ingrese una cartilla existente",
+        "ERROR3": "Esta cartilla no se encuentra activa actualmente",
+        "INGRESAR": "Ingresa tu número de cartilla",
+        "NºCARTILLA": "Nº Cartilla",
+        "BUSCANDO": "Buscando...",
+        "ACEPTAR": "ACEPTAR",
+        "VOLVER": "VOLVER A LA TIENDA"
+    }
+}

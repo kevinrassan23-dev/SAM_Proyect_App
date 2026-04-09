@@ -1,17 +1,17 @@
 import React from "react";
 import { Stack, usePathname } from "expo-router";
 import { View, Image } from "react-native";
-import { styles } from "../styles/LayoutStyle";
+import { styles } from "@/styles/screens/common/LayoutStyle";
 
 // HEADER APP BAR 
 function RootLayout() {
 
-    const SAM_LOGO = require("../assets/images/sam_logo.png");
+    const SAM_LOGO = require("@/assets/images/sam_logo.png");
 
     const pathname = usePathname();
 
     // Ocultar logo SOLO en Home
-    const hideHeader = pathname === "/screens/Home" || pathname === "/";
+    const hideHeader = pathname === "/screens/home/Home" || pathname === "/";
 
     return (
         <>

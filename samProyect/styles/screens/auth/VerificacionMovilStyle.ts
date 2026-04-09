@@ -1,0 +1,101 @@
+import { StyleSheet } from "react-native";
+import theme from "@/theme/Theme";
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: theme.spacing(2),
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: theme.colors.background,
+    },
+
+    title: {
+        fontSize: theme.fontSize.title,
+        fontWeight: "bold",
+        color: theme.colors.primary,
+        marginVertical: theme.spacing(3),
+        textAlign: "center",
+    },
+
+    button: {
+        backgroundColor: theme.colors.secondary,
+        width: "80%",
+        flexDirection: "row",
+        paddingVertical: theme.spacing(2),
+        borderRadius: 30,
+        marginBottom: theme.spacing(2),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    buttonCancel: {
+        backgroundColor: theme.colors.error,
+    },
+
+    buttonVolver: {
+        backgroundColor: theme.colors.error,
+        flexDirection: "row",
+        width: "80%",
+        paddingVertical: theme.spacing(2),
+        borderRadius: 30,
+        marginBottom: theme.spacing(1),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    buttonText: {
+        color: theme.colors.textSecondary,
+        fontSize: theme.fontSize.large,
+        fontWeight: "bold",
+        flex: 1,
+        textAlign: "center",
+    },
+
+    input: {
+        width: "80%",
+        backgroundColor: "#FFFFFF",
+        borderWidth: 2,
+        borderColor: theme.colors.success,
+        borderRadius: 8,
+        padding: theme.spacing(1.5),
+        fontSize: theme.fontSize.normal,
+        color: theme.colors.textPrimary,
+        marginBottom: theme.spacing(2),
+    },
+
+    error: {
+        color: theme.colors.error,
+        fontSize: theme.fontSize.small,
+        marginBottom: theme.spacing(1),
+        textAlign: "center",
+    },
+
+    view1: {
+        height: 16
+    },
+
+    view2: {
+        height: 32
+    },
+
+    VerificacionMovilContainer: {
+        flexDirection: "column",
+        gap: 4,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    timerText: {
+        color: theme.colors.error, // Rojo según tu tema
+        fontSize: theme.fontSize.normal,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: theme.spacing(2),
+    },
+    // Asegúrate de que el input tenga un estilo visual claro de deshabilitado
+    inputDisabled: {
+        backgroundColor: "#F0F0F0",
+        borderColor: "#CCC",
+    },
+});

@@ -1,0 +1,86 @@
+{
+    "Home": {
+        "ACCEDER": "COMMENCER"
+    },
+    "Hall": {
+        "CONRECETA": "AVEC ORDONNANCE",
+        "SINRECETA": "SANS ORDONNANCE",
+        "MEDICAMENTOSRECETADOS": "Médicaments prescrits",
+        "MEDICAMENTOSAGREGADOS": "Tous les médicaments ont été ajoutés à votre panier",
+        "TIENESRECETA": "Avez-vous une ordonnance ?",
+        "NOHAYRECETA": "Aucun produit disponible sans ordonnance",
+        "FILTRAR": "Filtrer les médicaments",
+        "BUSCAR": "Rechercher un médicament...",
+        "COMPRAR": "ACHETER",
+        "CANCELAR": "ANNULER",
+        "TOTAL": "Total",
+        "CARROAÑADIR": "Ajouter au panier",
+        "ARTICULOS": "Article(s)",
+        "GRIPEYRESFRIADO": "Grippe et Rhume",
+        "ANALGÉSICOS": "Analgésiques",
+        "ALÉRGENOS": "Allergènes",
+        "DIETAYNUTRICIÓN": "Régime et Nutrition",
+        "CUIDADODELCABELLOYPIEL": "Soin des Cheveux et de la Peau",
+        "SALUDBUSCAL": "Santé Bucale",
+        "PRIMEROSAUXILIOS": "Premiers Secours"
+    },
+    "FormaPago": {
+        "SELCMETPAG": "Sélectionnez un mode de paiement",
+        "EFECTIVO": "Payer en espèces",
+        "PAGONFC": "Payer avec NFC",
+        "TARJETA": "Payer par carte",
+        "VOLVER": "RETOUR À LA BOUTIQUE",
+        "CANCELAR": "ANNULER LA COMMANDE"
+    },
+    "PagoEfectivo": {
+        "ALERT1": "Paiement insuffisant",
+        "ALERT2": "Le paiement n'a pas pu être traité : montant insuffisant",
+        "EFECTIVO": "Payer en espèces",
+        "TOTAL": "MONTANT À PAYER",
+        "INGRESAR": "Entrez le montant à payer",
+        "ACEPTAR": "ACCEPTER",
+        "VOLVER": "RETOUR"
+    },
+    "PagoNFC": {
+        "PAGONFC": "Payer avec NFC",
+        "TOTAL": "MONTANT À PAYER",
+        "REDIRIGIR": "Redirection dans quelques secondes...",
+        "ACERCAR": "Approchez votre appareil du terminal pour payer",
+        "ACEPTADO": "¡Paiement accepté !",
+        "ESCANEAR": "SCANNER",
+        "VOLVER": "RETOUR"
+    },
+    "PagoTarjeta": {
+        "ALERT1": "Code PIN incomplet",
+        "ALERT2": "Veuillez saisir exactement 4 chiffres",
+        "TARJETA": "Payer par carte",
+        "TOTAL": "MONTANT À PAYER",
+        "PIN": "Entrez le code PIN de votre carte",
+        "ACEPTAR": "ACCEPTER",
+        "VOLVER": "RETOUR"
+    },
+    "Confirmacion": {
+        "DESCONOCIDO": "Inconnu",
+        "ERROR": "La commande n'a pas pu être complétée",
+        "GENERAR": "Génération de la commande...",
+        "GENERADO": "✅ Commande générée avec succès",
+        "PROCESANDO": "Traitement de la commande...",
+        "PROCESADO": "✅ Commande traitée avec succès",
+        "DEVOLVER": "💰 En retour ",
+        "LISTO": "Commande prête à être livrée...",
+        "ENTREGADO": "Commande livrée",
+        "ESTADO": "Statut de la commande :",
+        "ID": "Numéro de commande :",
+        "VOLVER": "Retour à l'accueil"
+    },
+    "IngresarCartilla": {
+        "ERROR1": "Veuillez entrer votre numéro de carte de santé",
+        "ERROR2": "Carte de santé introuvable, veuillez entrer une carte de santé existante",
+        "ERROR3": "Cette carte de santé n'est pas active actuellement",
+        "INGRESAR": "Entrez votre numéro de carte de santé.",
+        "NºCARTILLA": "Numéro de carte de santé",
+        "BUSCANDO": "Recherche en cours...",
+        "ACEPTAR": "ACCEPTER",
+        "VOLVER": "RETOUR À LA BOUTIQUE"
+    }
+}
