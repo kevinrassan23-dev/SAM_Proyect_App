@@ -4,162 +4,112 @@ import theme from "../theme/Theme";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: theme.spacing(3),
-        paddingVertical: theme.spacing(4),
-        justifyContent: "space-between",
+        padding: theme.spacing(2),
         backgroundColor: theme.colors.background,
     },
-
-    logoContainer: {
-        alignItems: "flex-end",
-        paddingHorizontal: theme.spacing(2.5),
-        paddingTop: theme.spacing(2),
-        width: "100%",
+    header: {
+        marginBottom: theme.spacing(2),
     },
-
-    logo: {
-        width: 120,
-        height: 60,
-        resizeMode: "contain",
-    },
-
-    headerSection: {
-        marginBottom: theme.spacing(1),
-    },
-
-    content: {
-        flex: 1,
-        paddingHorizontal: theme.spacing(2),
-        justifyContent: "center",
-    },
-
-    successContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    image: {
-        width: "100%",
-        height: "100%",
-        resizeMode: "contain",
-    },
-
-    titleText: {
-        fontSize: 32,
+    title: {
+        fontSize: theme.fontSize.title,
+        fontWeight: "bold",
         color: theme.colors.primary,
-        fontWeight: "800",
-        marginBottom: theme.spacing(3),
         textAlign: "center",
-        letterSpacing: -0.5,
     },
-
-    totalCard: {
-        backgroundColor: "#ffffff",
-        borderRadius: 18,
-        padding: theme.spacing(3.5),
-        marginBottom: theme.spacing(4),
-        borderLeftWidth: 5,
-        borderLeftColor: theme.colors.primary,
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 3,
+    totalContainer: {
+        marginTop: theme.spacing(2),
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: theme.spacing(2),
+        borderWidth: 2,
+        borderColor: theme.colors.secondary,
+        borderRadius: 12,
     },
-
     totalLabel: {
-        fontSize: theme.fontSize.small,
-        color: "#888",
-        marginBottom: theme.spacing(1),
-        fontWeight: "600",
-        textTransform: "uppercase",
-        letterSpacing: 1,
+        fontSize: theme.fontSize.normal,
+        color: theme.colors.textPrimary + "CC",
     },
-
     totalAmount: {
-        fontSize: 32,
-        color: theme.colors.primary,
-        fontWeight: "700",
+        fontSize: theme.fontSize.large,
+        fontWeight: "bold",
+        color: theme.colors.textPrimary,
     },
-
+    centerContent: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: theme.spacing(2),
+    },
+    iconCircle: {
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        backgroundColor: "#9525D720",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: theme.spacing(1),
+    },
+    successCircle: {
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        backgroundColor: "#16C17220",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: theme.spacing(1),
+    },
     instructionText: {
         fontSize: theme.fontSize.normal,
-        color: theme.colors.textPrimary,
+        color: theme.colors.textPrimary + "CC",
         textAlign: "center",
-        marginBottom: theme.spacing(4),
-        fontWeight: "600",
-        lineHeight: 26,
+        maxWidth: 280,
     },
-
-    successText: {
-        fontSize: 28,
-        color: theme.colors.primary,
-        fontWeight: "700",
-        marginTop: theme.spacing(4),
-        textAlign: "center",
-    },
-
-    redirectText: {
-        fontSize: theme.fontSize.normal,
-        color: "#999",
-        marginTop: theme.spacing(2),
-        textAlign: "center",
-        fontWeight: "500",
-    },
-
-    imagePlaceholder: {
-        width: 220,
-        height: 220,
-        backgroundColor: "transparent",
-        borderRadius: 120,
-        justifyContent: "center",
+    scanBtn: {
+        flexDirection: "row",
         alignItems: "center",
-        alignSelf: "center",
-        marginBottom: theme.spacing(4),
-        elevation: 0,
-        shadowColor: "transparent",
-    },
-
-    placeholderText: {
-        color: "#999",
-        fontSize: 12,
-        textAlign: "center",
-    },
-
-    buttons: {
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        gap: theme.spacing(2.5),
-    },
-
-    button: {
-        width: "100%",
+        gap: 8,
         backgroundColor: theme.colors.secondary,
-        paddingVertical: theme.spacing(2.25),
+        paddingVertical: theme.spacing(1.5),
+        paddingHorizontal: theme.spacing(3),
         borderRadius: 30,
-        alignItems: "center",
-        justifyContent: "center",
+        marginTop: theme.spacing(1),
         elevation: 4,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.18,
-        shadowRadius: 5,
     },
-
-    buttonSecondary: {
-        backgroundColor: "#f0f0f0",
-        elevation: 2,
-        shadowOpacity: 0.08,
-    },
-
-    buttonText: {
-        color: theme.colors.textSecondary,
+    scanBtnText: {
+        color: "#fff",
         fontSize: theme.fontSize.normal,
-        fontWeight: "700",
-        letterSpacing: 0.5,
+        fontWeight: "bold",
     },
-
-    buttonTextSecondary: {
+    successText: {
+        fontSize: theme.fontSize.title,
+        fontWeight: "bold",
         color: theme.colors.primary,
+    },
+    redirectText: {
+        fontSize: theme.fontSize.small,
+        color: theme.colors.textPrimary + "99",
+    },
+    secondaryButtons: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: "auto",
+    },
+    secondaryBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: theme.spacing(2),
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: theme.colors.secondary,
+    },
+    cancelBtn: {
+        borderColor: theme.colors.error,
+    },
+    secondaryBtnText: {
+        marginLeft: theme.spacing(1),
+        color: theme.colors.textPrimary,
+    },
+    cancelText: {
+        color: theme.colors.error,
     },
 });

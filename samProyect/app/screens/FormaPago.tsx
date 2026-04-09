@@ -1,59 +1,120 @@
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import {
+    Pressable,
+    Text,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../styles/FormaPagoStyle";
 
-function FormaPago() {
+type PaymentMethod = {
+    id: string;
+    label: string;
+    icon: keyof typeof MaterialIcons.glyphMap;
+    color: string;
+    route: string;
+};
+
+export default function FormaPago() {
     const { total } = useLocalSearchParams<{ total: string }>();
+    const safeTotal = Number(total || 0).toFixed(2);
 
-    const efectivo = () => {
-        router.push({ pathname: "/screens/PagoEfectivo", params: { total } });
-    }
-
-    const NFC = () => {
-        router.push({ pathname: "/screens/PagoNFC", params: { total } });
-    }
-
-    const tarjeta = () => {
-        router.push({ pathname: "/screens/PagoTarjeta", params: { total } });
-    }
-
-    const Volver = () => {
-        router.push({ pathname: "/screens/Hall"});
-    }
-
-    const cancelar = () => {
-        router.push("/screens/Home")
-    }
+    const methods: PaymentMethod[] = [
+        {
+            id: "efectivo",
+            label: "Efectivo",
+            icon: "payments",
+            color: "#16C172",
+            route: "/screens/PagoEfectivo",
+        },
+        {
+            id: "contactless",
+            label: "Pago sin contacto (Tarjeta o NFC)",
+            icon: "contactless",
+            color: "#9525D7",
+            route: "/screens/PagoNFC",
+        },
+    ];
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Método de pago</Text>
+            </View>
 
-            <Text style={styles.title}>¿CÓMO DESEA PAGAR?</Text>
+            {/* Total */}
+            <View style={styles.totalContainer}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={styles.totalAmount}>{safeTotal} €</Text>
+            </View>
 
-            <View style={styles.formaPagoContainer}>
-                <Pressable style={styles.button} onPress={efectivo}>
-                    <Text style={styles.buttonText}>EFECTIVO</Text>
+
+            {/* Opciones centradas */}
+            <View style={styles.centerContent}>
+                <Text style={styles.title}>
+                Selecciona cómo deseas realizar el pago
+            </Text>
+                <View style={styles.row}>
+                    {methods.map((method) => (
+                        <Pressable
+                            key={method.id}
+                            onPress={() =>
+                                router.push({
+                                    pathname: method.route as any,
+                                    params: { total },
+                                })
+                            }
+                            style={({ pressed }) => [
+                                styles.cardFilled,
+                                {
+                                    backgroundColor: method.color,
+                                    opacity: pressed ? 0.85 : 1,
+                                },
+                            ]}
+                        >
+                            <MaterialIcons
+                                name={method.icon}
+                                size={55}
+                                color="#fff"
+                            />
+                            <Text style={styles.cardFilledText}>
+                                {method.label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
+            </View>
+
+            {/* Botones abajo */}
+            <View style={styles.secondaryButtons}>
+                <Pressable
+                    style={styles.secondaryBtn}
+                    onPress={() => router.push("/screens/Hall")}
+                >
+                    <MaterialIcons name="store" size={18} color="#9525D7" />
+                    <Text style={styles.secondaryBtnText}>
+                        Volver a la tienda
+                    </Text>
                 </Pressable>
 
-                <Pressable style={styles.button} onPress={NFC}>
-                    <Text style={styles.buttonText}>PAGO NFC</Text>
-                </Pressable>
-
-                <Pressable style={styles.button} onPress={tarjeta}>
-                    <Text style={styles.buttonText}>TARJETA</Text>
-                </Pressable>
-
-                <Pressable style={styles.button} onPress={Volver}>
-                    <Text style={styles.buttonText}>VOLVER A LA TIENDA</Text>
-                </Pressable>
-
-                <Pressable style={styles.buttonVolver} onPress={cancelar}>
-                    <Text style={styles.buttonText}>CANCELAR PEDIDO</Text>
+                <Pressable
+                    style={[styles.secondaryBtn, styles.cancelBtn]}
+                    onPress={() => router.push("/screens/Home")}
+                >
+                    <MaterialIcons name="cancel" size={18} color="#d82215" />
+                    <Text
+                        style={[
+                            styles.secondaryBtnText,
+                            styles.cancelText,
+                        ]}
+                    >
+                        Cancelar pedido
+                    </Text>
                 </Pressable>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
-
-export default FormaPago;

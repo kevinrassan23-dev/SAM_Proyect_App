@@ -1,69 +1,108 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { View, Alert, Pressable } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
-import { router, useLocalSearchParams } from 'expo-router';
+import * as React from "react";
+import { useState } from "react";
+import { View, Alert, Pressable, TextInput } from "react-native";
+import { Text } from "react-native-paper";
+import { router, useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../styles/PagoEfectivoStyle";
+import theme from "../../theme/Theme";
 
 function PagoEfectivo() {
-  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
-  const TOTAL = parseFloat(totalParam || '0');
+    const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+    const TOTAL = parseFloat(totalParam || "0");
+    const safeTotal = TOTAL.toFixed(2);
 
+    const [importe, setImporte] = useState("");
 
+    const handleAceptar = () => {
+        const value = parseFloat(importe.replace(",", ".")) || 0;
+        if (value >= TOTAL) {
+            router.push({
+                pathname: "/screens/Confirmacion",
+                params: { total: TOTAL.toString(), metodo: "efectivo" },
+            });
+        } else {
+            Alert.alert(
+                "Pago insuficiente",
+                "No se puede procesar el pago: el importe es menor al total."
+            );
+        }
+    };
 
-  const [importe, setImporte] = useState('');
+    const handleVolver = () => {
+        router.push({
+            pathname: "/screens/FormaPago",
+            params: { total: TOTAL.toString() },
+        });
+    };
 
-  const handleAceptar = () => {
-    const value = parseFloat(importe.replace(',', '.')) || 0;
-    if (value >= TOTAL) {
-      router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "efectivo" } });
-    } else {
-      Alert.alert('Pago insuficiente', 'No se puede procesar el pago: el importe es menor al total.');
-    }
-  };
+    return (
+        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Pago en Efectivo</Text>
+            </View>
 
-  const handleVolver = () => {
-    router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
-  };
+            {/* Total */}
+            <View style={styles.totalContainer}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={styles.totalAmount}>{safeTotal} €</Text>
+            </View>
 
-  return (
-    <View style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.headerSection}>
-        <Text style={styles.titleText}>Pago en Efectivo</Text>
-      </View>
+            {/* Formulario centrado */}
+            <View style={styles.centerContent}>
+                <View style={styles.iconCircle}>
+                    <MaterialIcons name="payments" size={72} color="#16C172" />
+                </View>
 
-      {/* Total Card */}
-      <View style={styles.totalCard}>
-        <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
-        <Text style={styles.totalAmount}>${TOTAL.toFixed(2)}</Text>
-      </View>
+                <Text style={styles.inputLabel}>
+                    Ingresa el importe entregado
+                </Text>
 
-      {/* Form Section */}
-      <View style={styles.formSection}>
-        <Text style={styles.inputLabel}>Ingrese el monto a pagar</Text>
-        <TextInput
-          mode="outlined"
-          style={styles.input}
-          keyboardType="numeric"
-          value={importe}
-          onChangeText={setImporte}
-          placeholder="0.00"
-        />
-      </View>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={importe}
+                    onChangeText={setImporte}
+                    placeholder="0.00 €"
+                    placeholderTextColor={theme.colors.textPrimary + "66"}
+                />
 
-      {/* Buttons Section */}
-      <View style={styles.buttonsContainer}>
-        <Pressable style={styles.button} onPress={handleAceptar}>
-          <Text style={styles.buttonText}>ACEPTAR</Text>
-        </Pressable>
+                <Pressable
+                    style={({ pressed }) => [
+                        styles.acceptBtn,
+                        { opacity: pressed ? 0.85 : 1 },
+                    ]}
+                    onPress={handleAceptar}
+                >
+                    <MaterialIcons name="check-circle" size={22} color="#fff" />
+                    <Text style={styles.acceptBtnText}>Confirmar pago</Text>
+                </Pressable>
+            </View>
 
-        <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleVolver}>
-          <Text style={[styles.buttonText, styles.buttonTextSecondary]}>VOLVER</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
+            {/* Botones secundarios */}
+            <View style={styles.secondaryButtons}>
+                <Pressable style={styles.secondaryBtn} onPress={handleVolver}>
+                    <MaterialIcons
+                        name="arrow-back"
+                        size={18}
+                        color={theme.colors.secondary}
+                    />
+                    <Text style={styles.secondaryBtnText}>Volver</Text>
+                </Pressable>
+
+                <Pressable
+                    style={[styles.secondaryBtn, styles.cancelBtn]}
+                    onPress={() => router.push("/screens/Home")}
+                >
+                    <MaterialIcons name="cancel" size={18} color="#d82215" />
+                    <Text style={[styles.secondaryBtnText, styles.cancelText]}>
+                        Cancelar pedido
+                    </Text>
+                </Pressable>
+            </View>
+        </SafeAreaView>
+    );
 }
-
 export default PagoEfectivo;

@@ -5,52 +5,139 @@ export const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: theme.spacing(2),
-        justifyContent: "center",
-        alignItems: "center",
         backgroundColor: theme.colors.background,
     },
+
+    header: {
+        marginBottom: theme.spacing(2),
+    },
+
     title: {
         fontSize: theme.fontSize.title,
         fontWeight: "bold",
         color: theme.colors.primary,
-        marginVertical: theme.spacing(3),
         textAlign: "center",
     },
-    button: {
-        backgroundColor: theme.colors.secondary,
-        width: "80%",
+
+    totalContainer: {
+        marginTop: theme.spacing(2),
         flexDirection: "row",
-        paddingVertical: theme.spacing(2),
-        borderRadius: 30,
-        marginBottom: theme.spacing(2),
-        alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
+        padding: theme.spacing(2),
+        borderWidth: 2,
+        borderColor: theme.colors.secondary,
+        borderRadius: 12,
     },
 
-    buttonVolver: {
-        backgroundColor: "#d82215",
-        width: "80%",
-        flexDirection: "row",
-        paddingVertical: theme.spacing(2),
-        borderRadius: 30,
-        marginBottom: theme.spacing(2),
-        alignItems: "center",
-        justifyContent: "center",
+    totalLabel: {
+        fontSize: theme.fontSize.normal,
+        color: theme.colors.textPrimary + "CC",
     },
 
-    buttonText: {
-        color: theme.colors.textSecondary,
+    totalAmount: {
         fontSize: theme.fontSize.large,
         fontWeight: "bold",
-        flex: 1,
-        textAlign: "center",
+        color: theme.colors.textPrimary,
     },
 
-    formaPagoContainer: {
-        flex: 1,
-        flexDirection: "column",
-        gap: 16,
+    separator: {
+        height: 1,
+        backgroundColor: theme.colors.secondary,
+        marginVertical: theme.spacing(2),
+    },
+
+    cardsContainer: {
+        gap: theme.spacing(2),
+    },
+
+    card: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: theme.spacing(2),
+        borderRadius: 12,
+        borderWidth: 2,
+        backgroundColor: theme.colors.background,
+    },
+
+    iconContainer: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         justifyContent: "center",
         alignItems: "center",
-    }
+        elevation: 4,
+    },
+
+    cardTextContainer: {
+        flex: 1,
+        marginLeft: 12,
+        justifyContent: "center",
+    },
+
+    cardTitle: {
+        fontSize: theme.fontSize.large,
+        fontWeight: "bold",
+        color: theme.colors.textPrimary,
+    },
+
+    cardDescription: {
+        fontSize: theme.fontSize.normal,
+        color: theme.colors.textPrimary + "CC",
+    },
+
+    secondaryButtons: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: "auto",
+    },
+
+    secondaryBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: theme.spacing(2),
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: theme.colors.secondary,
+    },
+
+    cancelBtn: {
+        borderColor: theme.colors.error,
+    },
+
+    secondaryBtnText: {
+        marginLeft: theme.spacing(1),
+        color: theme.colors.textPrimary,
+    },
+
+    cancelText: {
+        color: theme.colors.error,
+    },
+
+    row: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 30,
+},
+
+cardFilled: {
+    flex: 1,
+    height: 220,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+},
+
+cardFilledText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 10,
+    textAlign: "center",
+},
+
+centerContent: {
+    flex: 1,
+    justifyContent: "center",
+},
+
 });

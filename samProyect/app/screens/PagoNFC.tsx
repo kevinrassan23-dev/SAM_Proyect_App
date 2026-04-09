@@ -1,88 +1,144 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { View, Image, Pressable } from 'react-native';
-import { Text } from 'react-native-paper';
-import customTheme from '../../theme/Theme';
-import { useNavigation } from '@react-navigation/native';
-import { router, useLocalSearchParams } from 'expo-router';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import { View, Pressable } from "react-native";
+import { Text } from "react-native-paper";
+import { router, useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../styles/PagoNFCStyle";
+import theme from "../../theme/Theme";
 
 function PagoNFC() {
-  const navigation = useNavigation<any>();
-  const { total: totalParam } = useLocalSearchParams<{ total: string }>();
-  const TOTAL = parseFloat(totalParam || '0');
-  const [pagoAceptado, setPagoAceptado] = useState(false);
+    const { total: totalParam } = useLocalSearchParams<{ total: string }>();
+    const TOTAL = parseFloat(totalParam || "0");
+    const safeTotal = TOTAL.toFixed(2);
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+    const [pagoAceptado, setPagoAceptado] = useState(false);
 
-    if (pagoAceptado) {
-      timer = setTimeout(() => {
-        // forward total and method when redirecting
-        router.push({ pathname: "/screens/Confirmacion", params: { total: TOTAL.toString(), metodo: "nfc" } });
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [pagoAceptado, navigation]);
+    useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>;
+        if (pagoAceptado) {
+            timer = setTimeout(() => {
+                router.push({
+                    pathname: "/screens/Confirmacion",
+                    params: { total: TOTAL.toString(), metodo: "nfc" },
+                });
+            }, 5000);
+        }
+        return () => clearTimeout(timer);
+    }, [pagoAceptado]);
 
-  const handleEscanear = () => {
-    setPagoAceptado(true);
-  };
+    const handleEscanear = () => {
+        setPagoAceptado(true);
+    };
 
-  const handleVolver = () => {
-    router.push({ pathname: "/screens/FormaPago", params: { total: TOTAL.toString() } });
-  };
+    const handleVolver = () => {
+        router.push({
+            pathname: "/screens/FormaPago",
+            params: { total: TOTAL.toString() },
+        });
+    };
 
-  return (
-    <View style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.headerSection}>
-        <Text style={styles.titleText}>Pago con NFC</Text>
-      </View>
-
-      {/* Content Section */}
-      <View style={styles.content}>
-        {!pagoAceptado ? (
-          <>
-            {/* Total Card */}
-            <View style={styles.totalCard}>
-              <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
-              <Text style={styles.totalAmount}>${TOTAL.toFixed(2)}</Text>
+    return (
+        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Pago sin contacto</Text>
             </View>
 
-            {/* NFC Image */}
-            <View style={styles.imagePlaceholder}>
-              <Image source={require('../../assets/images/nfc_scan.png')} style={styles.image} />
+            {/* Total */}
+            <View style={styles.totalContainer}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={styles.totalAmount}>{safeTotal} €</Text>
             </View>
 
-            {/* Instruction Text */}
-            <Text style={styles.instructionText}>Acerque su dispositivo al terminal para pagar</Text>
-          </>
-        ) : (
-          <View style={styles.successContainer}>
-            {/* Success Image */}
-            <View style={styles.imagePlaceholder}>
-              <Image source={require('../../assets/images/payment_success.png')} style={styles.image} />
-            </View>
-            <Text style={styles.successText}>¡Pago Aceptado!</Text>
-            <Text style={styles.redirectText}>Redirigiendo en unos segundos...</Text>
-          </View>
-        )}
-      </View>
+            {/* Contenido central */}
+            <View style={styles.centerContent}>
+                {!pagoAceptado ? (
+                    <>
+                        <View style={styles.iconCircle}>
+                            <MaterialIcons
+                                name="contactless"
+                                size={72}
+                                color={theme.colors.secondary}
+                            />
+                        </View>
 
-      {/* Buttons Section */}
-      {!pagoAceptado && (
-        <View style={styles.buttons}>
-          <Pressable style={styles.button} onPress={handleEscanear}>
-            <Text style={styles.buttonText}>ESCANEAR</Text>
-          </Pressable>
-          <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleVolver}>
-            <Text style={[styles.buttonText, styles.buttonTextSecondary]}>VOLVER</Text>
-          </Pressable>
-        </View>
-      )}
-    </View>
-  );
+                        <Text style={styles.instructionText}>
+                            Acerca tu tarjeta o dispositivo al terminal para
+                            pagar
+                        </Text>
+
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.scanBtn,
+                                { opacity: pressed ? 0.85 : 1 },
+                            ]}
+                            onPress={handleEscanear}
+                        >
+                            <MaterialIcons
+                                name="contactless"
+                                size={22}
+                                color="#fff"
+                            />
+                            <Text style={styles.scanBtnText}>Escanear</Text>
+                        </Pressable>
+                    </>
+                ) : (
+                    <>
+                        <View style={styles.successCircle}>
+                            <MaterialIcons
+                                name="check-circle"
+                                size={80}
+                                color={theme.colors.primary}
+                            />
+                        </View>
+
+                        <Text style={styles.successText}>¡Pago aceptado!</Text>
+                        <Text style={styles.redirectText}>
+                            Redirigiendo en unos segundos...
+                        </Text>
+                    </>
+                )}
+            </View>
+
+            {/* Botones secundarios */}
+            {!pagoAceptado && (
+                <View style={styles.secondaryButtons}>
+                    <Pressable
+                        style={styles.secondaryBtn}
+                        onPress={handleVolver}
+                    >
+                        <MaterialIcons
+                            name="arrow-back"
+                            size={18}
+                            color={theme.colors.secondary}
+                        />
+                        <Text style={styles.secondaryBtnText}>Volver</Text>
+                    </Pressable>
+
+                    <Pressable
+                        style={[styles.secondaryBtn, styles.cancelBtn]}
+                        onPress={() => router.push("/screens/Home")}
+                    >
+                        <MaterialIcons
+                            name="cancel"
+                            size={18}
+                            color="#d82215"
+                        />
+                        <Text
+                            style={[
+                                styles.secondaryBtnText,
+                                styles.cancelText,
+                            ]}
+                        >
+                            Cancelar pedido
+                        </Text>
+                    </Pressable>
+                </View>
+            )}
+        </SafeAreaView>
+    );
 }
 
 export default PagoNFC;
