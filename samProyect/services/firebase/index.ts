@@ -1,5 +1,4 @@
-/**
- * Este archivo se utiliza para acortar las rutas
- * de los imports (Opcional)
- * 
- */
+export { pacientesService } from './pacientes';
+export { recetasService } from './recetas';
+export { validacionService } from './validacion';
+export { phoneAuthService } from './phoneAuth';

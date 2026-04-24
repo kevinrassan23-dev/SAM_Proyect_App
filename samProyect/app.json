@@ -7,7 +7,6 @@
     "icon": "./assets/images/app_icon.png",
     "scheme": "samproyect",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -16,8 +15,8 @@
         "foregroundImage": "./assets/images/app_icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.samProyect"
     },
     "web": {
       "output": "static",
