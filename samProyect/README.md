@@ -86,7 +86,8 @@ git clone https://github.com/kevinrassan23-dev/SAM_Proyect_WebAdmin.git
 ### 2. Abrir el proyecto en tu editor
 
 ```bash
-cd SAM_Proyect_App    # o SAM_Proyect_WebAdmin
+cd samProyect (APP)
+cd samProyectAdmin (WEB)
 code .
 ```
 
