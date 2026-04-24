@@ -6,14 +6,14 @@ export const styles = StyleSheet.create({
         flex: 1,
         padding: theme.spacing(2),
         backgroundColor: theme.colors.background,
-        justifyContent: "center",  // ✅ CAMBIO: center para centrar todo
+        justifyContent: "center",
         alignItems: "center",
     },
     title: {
         fontSize: theme.fontSize.title,
         fontWeight: "bold",
         color: theme.colors.primary,
-        marginBottom: theme.spacing(3),  // ✅ CAMBIO: marginBottom en lugar de marginVertical
+        marginBottom: theme.spacing(3),
         textAlign: "center",
     },
     button: {
@@ -49,7 +49,7 @@ export const styles = StyleSheet.create({
     formaPagoContainer: {
         flexDirection: "column",
         gap: 8,
-        justifyContent: "center",  // ✅ CAMBIO: center en lugar de flex-start
+        justifyContent: "center",
         alignItems: "center",
         width: "100%",
     }

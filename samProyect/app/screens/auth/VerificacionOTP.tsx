@@ -1,152 +1,94 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, Pressable, Alert } from 'react-native';
-import { Text } from 'react-native-paper';
-import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { styles } from '@/styles/screens/auth/VerificacionOTPStyle';
 import { phoneAuthService } from '@/services/firebase';
+import { styles } from '@/styles/screens/auth/VerificacionOTPStyle';
 import theme from '@/theme/Theme';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import { useTranslation } from "react-i18next";
+import "@/language/config/ConfigIdiomas";
+import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Text } from 'react-native-paper';
 
 function VerificacionOTP() {
-  const { dni, nombre, tipo, cartilla, telefono } = useLocalSearchParams<{
-    dni: string;
-    nombre: string;
-    tipo: string;
+  // --- HOOKS Y ESTADOS ---
+  const params = useLocalSearchParams<{ 
+    dni: string; 
+    nombre: string; 
     cartilla: string;
     telefono: string;
+    tipo: string;
   }>();
-
+  const { t } = useTranslation();
   const [codigoOTP, setCodigoOTP] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [intentosFallidos, setIntentosFallidos] = useState(0);
-  const [tiempoExpiracion, setTiempoExpiracion] = useState(300); // 5 minutos
-  
-  const inputRef = useRef<TextInput>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // ✅ NUEVO
+  const [tiempoExpiracion, setTiempoExpiracion] = useState(300);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const MAX_INTENTOS = 3;
-
-  // ✅ NUEVO: Usar useFocusEffect para limpiar cuando salgas
+  /** Control del ciclo de vida del temporizador de 5 minutos */
   useFocusEffect(
     React.useCallback(() => {
-      // Cuando ENTRAS a la pantalla
-      console.log('📱 Entrando a VerificacionOTP');
-
+      console.log(`[${new Date().toLocaleTimeString()}] OTP activo. Timer iniciado.`);
       intervalRef.current = setInterval(() => {
         setTiempoExpiracion((prev) => {
           if (prev <= 1) {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            Alert.alert(
-              "Tiempo agotado",
-              "Por seguridad, debes iniciar el proceso de nuevo.",
-              [{ text: "OK", onPress: () => volverAlInicio() }]
-            );
+            clearInterval(intervalRef.current!);
+            router.replace("/screens/auth/IngresarCartilla");
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-
-      // Cuando SALGAS de la pantalla
-      return () => {
-        console.log('❌ Saliendo de VerificacionOTP - Limpiando timer');
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      };
+      return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
     }, [])
   );
 
-  const volverAlInicio = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    router.replace("/screens/auth/IngresarCartilla");
-  };
-
+  /** Valida el OTP y sincroniza datos de recetas antes de entrar al Hall */
   const handleVerificarOTP = async () => {
-    setError('');
-    if (codigoOTP.length !== 6) {
-      setError('Ingresa los 6 dígitos');
-      return;
-    }
+    const ts = new Date().toLocaleTimeString();
+    if (codigoOTP.length !== 6) return;
 
     setLoading(true);
     try {
-      console.log('🔐 Verificando OTP...');
+      console.log(`[${ts}] Verificando código en Firebase...`);
       const resultado = await phoneAuthService.verificarOTP(codigoOTP);
 
       if (!resultado.valido) {
-        const nuevoIntento = intentosFallidos + 1;
-        setIntentosFallidos(nuevoIntento);
-
-        if (nuevoIntento >= MAX_INTENTOS) {
-          // ✅ Limpiar timer antes de navegar
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          
-          Alert.alert("Acceso Denegado", "Demasiados intentos fallidos.", [
-            { text: "OK", onPress: () => volverAlInicio() }
-          ]);
-        } else {
-          setError(`Código incorrecto. Intento ${nuevoIntento} de ${MAX_INTENTOS}`);
-        }
+        console.log(`[${ts}] Código OTP inválido.`);
+        setError(t("VerificacionOTP.ERROR21"));
         setLoading(false);
         return;
       }
 
-      // Proceso de éxito
-      const { recetasService } = await import('@/services/firebase');
-      const medicamentosRecetaData = await recetasService.obtenerMedicamentosReceta(dni);
-      const listaNombres = Array.isArray(medicamentosRecetaData)
-        ? medicamentosRecetaData.map((m: any) => m.nombre).filter((n: string) => n?.trim() !== '')
-        : [];
-
-      // ✅ Limpiar timer antes de navegar
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-
-      Alert.alert('✅ Bienvenido', `Hola, ${nombre.split(' ')[0]} 👋`, [
-        {
-          text: 'OK',
-          onPress: () => {
-            router.push({
-              pathname: '/screens/shop/Hall',
-              params: {
-                dni, nombre, tipo, cartilla, telefono,
-                tieneReceta: listaNombres.length > 0 ? 'true' : 'false',
-                medicamentosReceta: listaNombres.join(','),
-              },
-            });
-          },
-        },
-      ]);
+      console.log(`[${ts}] Autenticación exitosa. Cargando datos de farmacia.`);
+      const { recetasService } = await import('@/services/firebase/recetas');
+      const medData = await recetasService.obtenerMedicamentosReceta(params.dni);
+      
+      const listaNombres = medData.map((m: any) => m.nombre).filter((n: string) => n?.trim() !== '');
+      router.push({
+          pathname: '/screens/shop/Hall',
+          params: { 
+              ...params,
+              tieneReceta: listaNombres.length > 0 ? 'true' : 'false',
+              medicamentosReceta: listaNombres.join(','),
+          }
+      });
     } catch (e: any) {
-      setError('Error de verificación');
+      console.error(`[${ts}] Error crítico:`, e.message);
+      setError(t("VerificacionOTP.ERROR3"));
     } finally {
-      if (loading) setLoading(false);
+      setLoading(false);
     }
   };
 
-  const formatearTiempo = (segundos: number) => {
-    const minutos = Math.floor(segundos / 60);
-    const secs = segundos % 60;
-    return `${minutos}:${secs.toString().padStart(2, '0')}`;
-  };
-
+  // --- ESTRUCTURA DE INTERFAZ (UI) ---
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Verificación SMS</Text>
-      <Text style={styles.instruction}>Ingresa el código de 6 dígitos</Text>
+      {/* Encabezado informativo */}
+      <Text style={styles.title}>{t("VerificacionOTP.SMS")}</Text>
+      <Text style={styles.instruction}>{t("VerificacionOTP.CODIGO")}</Text>
 
+      {/* Input de código de 6 dígitos */}
       <TextInput
-        ref={inputRef}
         placeholder="000000"
         value={codigoOTP}
         onChangeText={text => setCodigoOTP(text.replace(/[^0-9]/g, ''))}
@@ -156,26 +98,22 @@ function VerificacionOTP() {
         editable={!loading}
       />
 
+      {/* Sección de estado: Timer y Errores */}
       <View style={{ height: 80, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: theme.colors.secondary, fontWeight: 'bold', fontSize: 16 }}>
-          Expira en: {formatearTiempo(tiempoExpiracion)}
+        <Text style={{ color: theme.colors.secondary, fontWeight: 'bold' }}>
+          {t("VerificacionOTP.EXPIRA")} {Math.floor(tiempoExpiracion/60)}:{(tiempoExpiracion%60).toString().padStart(2,'0')}
         </Text>
-        {error !== '' && (
-          <Text style={{ color: theme.colors.error, fontWeight: 'bold', marginTop: 10 }}>
-            {error}
-          </Text>
-        )}
+        {error !== '' && <Text style={{ color: theme.colors.error, marginTop: 10 }}>{error}</Text>}
       </View>
 
+      {/* Botón de acción final */}
       <View style={styles.buttonsContainer}>
-        <Pressable
-          style={[styles.button, (loading || codigoOTP.length !== 6) && { opacity: 0.5 }]}
+        <Pressable 
+          style={[styles.button, (loading || codigoOTP.length !== 6) && { opacity: 0.5 }]} 
           onPress={handleVerificarOTP}
-          disabled={loading || codigoOTP.length !== 6}
         >
-          <Text style={styles.buttonText}>{loading ? 'VALIDANDO...' : 'ACEPTAR'}</Text>
+          <Text style={styles.buttonText}>{loading ? t("VerificacionOTP.VALIDANDO") : t("VerificacionOTP.ACEPTAR")}</Text>
         </Pressable>
-
       </View>
     </View>
   );

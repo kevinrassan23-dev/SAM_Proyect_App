@@ -37,8 +37,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
   },
-
-  // ✅ NUEVO: Texto para intentos restantes
+  
   intentosText: {
     color: '#FF9800',
     fontSize: theme.fontSize.small,
@@ -47,7 +46,6 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // ✅ NUEVO: Texto para bloqueo
   bloqueoText: {
     color: '#FF5252',
     fontSize: theme.fontSize.small,
@@ -81,7 +79,7 @@ export const styles = StyleSheet.create({
   },
 
   timerText: {
-    color: theme.colors.error, // Rojo según tu tema
+    color: theme.colors.error, 
     fontSize: theme.fontSize.normal,
     fontWeight: "bold",
     textAlign: "center",

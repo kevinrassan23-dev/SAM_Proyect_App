@@ -11,12 +11,7 @@ export const styles = StyleSheet.create({
         flex: 1,
     },
     headerSection: {
-        marginTop: theme.spacing(16), 
-        marginBottom: theme.spacing(2),
-        alignItems: 'center',
-    },
-    headerSectionSuccess: {
-        marginTop: theme.spacing(20), 
+        marginTop: theme.spacing(15), 
         marginBottom: theme.spacing(2),
         alignItems: 'center',
     },
@@ -27,17 +22,11 @@ export const styles = StyleSheet.create({
         textAlign: "center",
         letterSpacing: -0.5,
     },
-    centerContent: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-    },
     totalCard: {
-        width: '100%',
         backgroundColor: "#ffffff",
         borderRadius: 18,
         padding: theme.spacing(3.5),
-        marginTop: theme.spacing(6), 
+        marginTop: theme.spacing(4), 
         borderLeftWidth: 5,
         borderLeftColor: theme.colors.secondary, 
         elevation: 4,
@@ -59,26 +48,41 @@ export const styles = StyleSheet.create({
         color: theme.colors.secondary,
         fontWeight: "700",
     },
-    imageContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+    formSection: {
+        width: "100%",
+        marginTop: theme.spacing(8), 
     },
-    cardImage: {
-        width: 200,
-        height: 200,
-        resizeMode: 'contain',
+    inputLabel: {
+        fontSize: 20,
+        color: theme.colors.textPrimary,
+        fontWeight: "600",
+        marginBottom: theme.spacing(2),
+        textAlign: 'center',
+    },
+    input: {
+        backgroundColor: theme.colors.background,
+        fontSize: 28, 
+        height: 75,
+    },
+    inputContent: {
+        paddingHorizontal: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    outlineStyle: {
+        borderRadius: 12,
+        borderWidth: 2,
     },
     buttonsContainer: {
         width: "100%",
         flexDirection: "column",
-        gap: theme.spacing(2),
+        gap: theme.spacing(2), 
         marginTop: 'auto', 
         paddingBottom: theme.spacing(6),
     },
     button: {
         width: "100%",
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.secondary,
         paddingVertical: theme.spacing(2.25),
         borderRadius: 30,
         alignItems: "center",
@@ -86,10 +90,7 @@ export const styles = StyleSheet.create({
         elevation: 4,
     },
     buttonSecondary: {
-        backgroundColor: theme.colors.secondary,
-    },
-    buttonScan: {
-        backgroundColor: theme.colors.success,
+        backgroundColor: theme.colors.error,
     },
     buttonText: {
         color: "#ffffff",
@@ -98,30 +99,5 @@ export const styles = StyleSheet.create({
     },
     buttonTextSecondary: {
         color: "#ffffff",
-    },
-    instructionText: {
-        fontSize: 20,
-        color: theme.colors.textPrimary,
-        textAlign: "center",
-        marginTop: 20,
-        fontWeight: "600",
-        paddingHorizontal: 20,
-    },
-    successHeaderSection: {
-        marginBottom: theme.spacing(1),
-    },
-    successContent: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: theme.spacing(2),
-        marginBottom: theme.spacing(12),
-    },
-    successTitle: {
-        fontSize: 28,
-        color: theme.colors.primary,
-        fontWeight: "700",
-        marginTop: theme.spacing(4),
-        textAlign: "center",
     },
 });

@@ -2,7 +2,6 @@ import { StyleSheet } from "react-native";
 import theme from "@/theme/Theme";
 
 export const styles = StyleSheet.create({
-
     container: {
         flex: 1,
         paddingHorizontal: theme.spacing(3),
@@ -11,11 +10,9 @@ export const styles = StyleSheet.create({
     },
     mainContent: {
         flex: 1,
-        // Añadimos un margen superior extra a todo el bloque de contenido
         marginTop: theme.spacing(4), 
     },
     headerSection: {
-        // Aumentamos a 10 o 12 para bajarlo notablemente de la zona del logo
         marginTop: theme.spacing(16), 
         marginBottom: theme.spacing(1),
         alignItems: 'center',
@@ -31,11 +28,10 @@ export const styles = StyleSheet.create({
         backgroundColor: "#ffffff",
         borderRadius: 18,
         padding: theme.spacing(3.5),
-        // Aumentamos el espacio entre el título y la tarjeta
         marginTop: theme.spacing(4), 
         borderLeftWidth: 5,
         borderLeftColor: theme.colors.secondary, 
-        elevation: 4, // Un poco más de sombra para que destaque al bajar
+        elevation: 4, 
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -43,7 +39,6 @@ export const styles = StyleSheet.create({
     },
     formSection: {
         width: "100%",
-        // Más espacio entre la tarjeta de total y el input de monto
         marginTop: theme.spacing(6), 
     },
     totalLabel: {

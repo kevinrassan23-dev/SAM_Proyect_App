@@ -1,17 +1,27 @@
-import React, { useState, useEffect } from "react";
-import {
-  View, Text, Pressable, FlatList,
-  Modal, Image, ScrollView, TextInput,
-  Alert,
-} from "react-native";
+import { Medicamento, medicamentosService } from "@/services/supabase/medicamentos";
+import { styles } from "@/styles/screens/shop/HallStyle";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { styles } from "@/styles/screens/shop/HallStyle";
-import { medicamentosService, Medicamento } from "@/services/supabase/medicamentos";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import "@/language/config/ConfigIdiomas";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
+// --- Tipos y Definiciones ---
 type CarritoItem = { medicamento: Medicamento; cantidad: number };
 
 function Hall() {
+  // --- Hooks y Parámetros ---
   const {
     telefono,
     dni,
@@ -21,31 +31,42 @@ function Hall() {
     carrito: carritoParam
   } = useLocalSearchParams();
 
+  const { t } = useTranslation();
+
+  // --- Estados de Interfaz ---
   const [showDrawer, setShowDrawer] = useState(false);
   const [showNofilterDrawer, setshowNofilterDrawer] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [sinReceta, setSinReceta] = useState<CarritoItem[]>([]);
-  const [conReceta, setConReceta] = useState<CarritoItem[]>([]);
   const [search, setSearch] = useState("");
-  const [medicamentosBD, setMedicamentosBD] = useState<Medicamento[]>([]);
-  const [medicamentosRecetaBD, setMedicamentosRecetaBD] = useState<Medicamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // --- Estados de Negocio y Carrito ---
+  const [sinReceta, setSinReceta] = useState<CarritoItem[]>([]);
+  const [conReceta, setConReceta] = useState<CarritoItem[]>([]);
+  const [medicamentosBD, setMedicamentosBD] = useState<Medicamento[]>([]);
+  const [medicamentosRecetaBD, setMedicamentosRecetaBD] = useState<Medicamento[]>([]);
   const [medicamentosRecetaSeleccionados, setMedicamentosRecetaSeleccionados] = useState<Set<string>>(new Set());
   const [stock, setStock] = useState<Record<string, number>>({});
-
-  // ── NUEVO: IDs de medicamentos con receta bloqueados localmente (1 hora tras compra)
   const [medicamentosBloqueados, setMedicamentosBloqueados] = useState<Set<string>>(new Set());
-
-  const sinRecetaIds = new Set(sinReceta.map(ci => ci.medicamento.id));
-  const tieneReceta = tieneRecetaParam === "true";
-
-  const carritoData = [...conReceta, ...sinReceta];
-
+  const [nombresBloqueadosRateLimit, setNombresBloqueadosRateLimit] = useState<Set<string>>(new Set());
   const [todosRecetaAnadidos, setTodosRecetaAnadidos] = useState(false);
 
+  // --- Variables Computadas ---
+  const sinRecetaIds = new Set(sinReceta.map(ci => ci.medicamento.id));
+  const tieneReceta = tieneRecetaParam === "true";
+  const carritoData = [...conReceta, ...sinReceta];
+  const totalGeneral = carritoData.reduce((total, ci) => total + (ci.medicamento.precio * ci.cantidad), 0);
+  const carrito = [...conReceta, ...sinReceta];
+
+  // --- Efectos de Inicialización ---
+
+  /**
+   * Restaura el estado del carrito si existe un parámetro de carrito previo en la URL.
+   */
   useEffect(() => {
     if (carritoParam && medicamentosBD.length > 0) {
+      console.log(`[${new Date().toLocaleTimeString()}] Restaurando carrito desde parámetros.`);
       try {
         const datosRecibidos = JSON.parse(carritoParam as string) as CarritoItem[];
         const nombresRecetaURL = new Set(
@@ -53,15 +74,18 @@ function Hall() {
             ? medicamentosReceta.split(",").map(n => n.trim().toLowerCase())
             : []
         );
+
         const recuperadosConReceta = datosRecibidos.filter(item =>
           nombresRecetaURL.has(item.medicamento.nombre.toLowerCase())
         );
         const recuperadosSinReceta = datosRecibidos.filter(item =>
           !recuperadosConReceta.some(r => r.medicamento.id === item.medicamento.id)
         );
+
         setConReceta(recuperadosConReceta);
         setSinReceta(recuperadosSinReceta);
         setMedicamentosRecetaSeleccionados(new Set(recuperadosConReceta.map(m => m.medicamento.id)));
+        
         setStock(prev => {
           const nuevoStock = { ...prev };
           datosRecibidos.forEach(item => {
@@ -74,64 +98,76 @@ function Hall() {
           return nuevoStock;
         });
       } catch (e) {
-        console.error("Error al restaurar estado visual:", e);
+        console.log(`[${new Date().toLocaleTimeString()}] Error al restaurar estado visual:`, e);
       }
     }
   }, [carritoParam, medicamentosBD, medicamentosReceta]);
 
+  /**
+   * Carga inicial de datos: Medicamentos de Supabase, Recetas de Firebase y Rate Limits.
+   */
   useEffect(() => {
     const fetchMedicamentos = async () => {
       setLoading(true);
+      console.log(`[${new Date().toLocaleTimeString()}] Iniciando carga de medicamentos y reglas de negocio.`);
       try {
-        // 1. Cargar sin receta desde Supabase
+        // 1. Obtención de medicamentos generales
         const dataSinReceta = await medicamentosService.obtenerSinReceta();
         setMedicamentosBD(dataSinReceta);
 
-        // 2. Cargar con receta desde Firebase
+        // 2. Obtención de medicamentos con receta y gestión de bloqueos temporales
         let dataConReceta: Medicamento[] = [];
         if (tieneReceta && medicamentosReceta) {
           const { recetasService } = await import('@/services/firebase/recetas');
-
-          // ── NUEVO: Limpiamos bloqueos caducados antes de consultar
           await recetasService.limpiarBloqueosCaducados();
-
           dataConReceta = await recetasService.obtenerMedicamentosReceta(dni as string);
-
-          // ── NUEVO: Leemos qué medicamentos siguen bloqueados localmente (< 1 hora)
+          
           const bloqueados = await recetasService.obtenerMedicamentosBloqueados();
           setMedicamentosBloqueados(new Set(bloqueados));
-
           setMedicamentosRecetaBD(dataConReceta);
         }
 
-        // 3. Inicialización de stock
-        const stockInicial: Record<string, number> = {};
-        dataSinReceta.forEach(med => { stockInicial[med.id] = med.stock ?? 100; });
-        dataConReceta.forEach(med => { stockInicial[med.id] = med.stock ?? 100; });
+        // 3. Gestión de Rate Limit para pedidos
+        const { rateLimitService } = await import('@/services/supabase/retelimitPedidos');
+        await rateLimitService.limpiarExpirados();
+        const nombresBloqueados = await rateLimitService.obtenerNombresBloqueados();
+        setNombresBloqueadosRateLimit(nombresBloqueados);
 
-        // 4. Restauración si volvió de FormaPago
+        // 4. Inicialización de stock
+        const stockInicial: Record<string, number> = {};
+        [...dataSinReceta, ...dataConReceta].forEach(med => {
+          stockInicial[med.id] = med.stock ?? 0;
+        });
+
+        // 5. Sincronización de stock con carrito existente
         if (carritoParam) {
-          const datosRecibidos = JSON.parse(carritoParam as string) as CarritoItem[];
-          const recuperadosConReceta = datosRecibidos.filter(item =>
-            dataConReceta.some(m => m.id === item.medicamento.id)
-          );
-          const recuperadosSinReceta = datosRecibidos.filter(item =>
-            !recuperadosConReceta.some(r => r.medicamento.id === item.medicamento.id)
-          );
-          setConReceta(recuperadosConReceta);
-          setSinReceta(recuperadosSinReceta);
-          setMedicamentosRecetaSeleccionados(new Set(recuperadosConReceta.map(m => m.medicamento.id)));
-          datosRecibidos.forEach(item => {
-            if (stockInicial[item.medicamento.id] !== undefined) {
-              stockInicial[item.medicamento.id] -= item.cantidad;
-            }
-          });
+          try {
+            const datosRecibidos = JSON.parse(carritoParam as string) as CarritoItem[];
+            datosRecibidos.forEach(item => {
+              if (stockInicial[item.medicamento.id] !== undefined) {
+                const stockActual = stockInicial[item.medicamento.id];
+                stockInicial[item.medicamento.id] = Math.max(0, stockActual - item.cantidad);
+              }
+            });
+
+            const recuperadosConReceta = datosRecibidos.filter(item =>
+              dataConReceta.some(m => m.id === item.medicamento.id)
+            );
+            const recuperadosSinReceta = datosRecibidos.filter(item =>
+              !dataConReceta.some(m => m.id === item.medicamento.id)
+            );
+
+            setConReceta(recuperadosConReceta);
+            setSinReceta(recuperadosSinReceta);
+            setMedicamentosRecetaSeleccionados(new Set(recuperadosConReceta.map(m => m.medicamento.id)));
+          } catch (e) {
+            console.log(`[${new Date().toLocaleTimeString()}] Error parseando carritoParam`, e);
+          }
         }
 
         setStock(stockInicial);
-
       } catch (err: any) {
-        console.error("Error en Hall fetch:", err.message);
+        console.log(`[${new Date().toLocaleTimeString()}] Error en Hall fetch:`, err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -141,6 +177,11 @@ function Hall() {
     fetchMedicamentos();
   }, [tieneReceta, medicamentosReceta, carritoParam]);
 
+  // --- Lógica de Negocio y Manejadores ---
+
+  /**
+   * Agrupa los medicamentos por su categoría/familia.
+   */
   const medicamentosPorFamilia: Record<string, Medicamento[]> = medicamentosBD.reduce(
     (acc, med) => {
       const familia = med.familia || "Otros";
@@ -151,9 +192,14 @@ function Hall() {
     {} as Record<string, Medicamento[]>
   );
 
+  /**
+   * Elimina un producto del carrito y devuelve su cantidad al stock.
+   */
   const handleRemoveProducto = (id: string) => {
+    console.log(`[${new Date().toLocaleTimeString()}] Eliminando producto: ${id}`);
     const medCon = conReceta.find(m => m.medicamento.id === id);
     const medSin = sinReceta.find(m => m.medicamento.id === id);
+
     if (medCon) {
       setConReceta(prev => prev.filter(item => item.medicamento.id !== id));
       setMedicamentosRecetaSeleccionados(prev => {
@@ -161,72 +207,128 @@ function Hall() {
         newSet.delete(id);
         return newSet;
       });
-      setStock(prev => ({ ...prev, [id]: (prev[id] ?? 100) + medCon.cantidad }));
+      setStock(prev => ({ ...prev, [id]: (prev[id] ?? 0) + medCon.cantidad }));
+      setTodosRecetaAnadidos(false);
     } else if (medSin) {
       setSinReceta(prev => prev.filter(item => item.medicamento.id !== id));
-      setStock(prev => ({ ...prev, [id]: (prev[id] ?? 100) + medSin.cantidad }));
+      setStock(prev => ({ ...prev, [id]: (prev[id] ?? 0) + medSin.cantidad }));
     }
   };
 
+  /**
+   * Incrementa la cantidad de un producto sin receta respetando límites y stock.
+   */
   const handleIncrementar = (id: string) => {
-    if ((stock[id] ?? 100) <= 0) return;
-    setSinReceta(prev => prev.map(ci =>
-      ci.medicamento.id === id && ci.cantidad < 5 ? { ...ci, cantidad: ci.cantidad + 1 } : ci
-    ));
-    setStock(prev => ({ ...prev, [id]: (prev[id] ?? 100) - 1 }));
+    setSinReceta((prev) =>
+      prev.map((item) => {
+        if (item.medicamento.id === id) {
+          if (item.cantidad >= 3) return item;
+          const stockActual = stock[id] ?? 0;
+          if (stockActual <= 0) return item;
+
+          setStock((prevStock) => ({
+            ...prevStock,
+            [id]: prevStock[id] - 1,
+          }));
+          return { ...item, cantidad: item.cantidad + 1 };
+        }
+        return item;
+      })
+    );
   };
 
+  /**
+   * Decrementa la cantidad de un producto y actualiza el stock.
+   */
   const handleDecrementar = (id: string) => {
     setSinReceta(prev => prev.map(ci =>
       ci.medicamento.id === id && ci.cantidad > 1 ? { ...ci, cantidad: ci.cantidad - 1 } : ci
     ));
-    setStock(prev => ({ ...prev, [id]: (prev[id] ?? 100) + 1 }));
+    setStock(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
   };
 
+  /**
+   * Añade un medicamento con receta al carrito tras validar bloqueos.
+   */
   const handleAgregarConReceta = (med: Medicamento) => {
-      if (medicamentosBloqueados.has(med.id)) return;
-      if (!medicamentosRecetaSeleccionados.has(med.id)) {
-          const nuevosSeleccionados = new Set([...medicamentosRecetaSeleccionados, med.id]);
-          setConReceta(prev => [...prev, { medicamento: med, cantidad: 1 }]);
-          setMedicamentosRecetaSeleccionados(nuevosSeleccionados);
-          setStock(prev => ({ ...prev, [med.id]: (prev[med.id] ?? 100) - 1 }));
+    if (medicamentosBloqueados.has(med.id)) {
+      console.log(`[${new Date().toLocaleTimeString()}] Intento de agregar med bloqueado: ${med.id}`);
+      return;
+    }
+    if (!medicamentosRecetaSeleccionados.has(med.id)) {
+      const nuevosSeleccionados = new Set([...medicamentosRecetaSeleccionados, med.id]);
+      setConReceta(prev => [...prev, { medicamento: med, cantidad: 1 }]);
+      setMedicamentosRecetaSeleccionados(nuevosSeleccionados);
+      setStock(prev => ({ ...prev, [med.id]: (prev[med.id] ?? 100) - 1 }));
 
-          // ── Si todos los medicamentos con receta están ya seleccionados, mostramos mensaje
-          const todosAnadidos = medicamentosRecetaBD.every(m => nuevosSeleccionados.has(m.id));
-          setTodosRecetaAnadidos(todosAnadidos);
-      }
+      const todosAnadidos = medicamentosRecetaBD.every(m => nuevosSeleccionados.has(m.id));
+      setTodosRecetaAnadidos(todosAnadidos);
+    }
   };
 
+  /**
+   * Añade un medicamento sin receta al carrito.
+   */
   const handleAgregarSinReceta = (med: Medicamento) => {
     setSinReceta(prev => [...prev, { medicamento: med, cantidad: 1 }]);
     setStock(prev => ({ ...prev, [med.id]: (prev[med.id] ?? 100) - 1 }));
   };
 
+  /**
+   * Alterna la visibilidad de las categorías en la lista.
+   */
   const toggleCategory = (categoria: string) => {
     setExpandedCategories(prev => ({ ...prev, [categoria]: !prev[categoria] }));
   };
 
+  /**
+   * Procesa la navegación a la pantalla de pago tras validar el total.
+   */
   const comprar = async () => {
     if (carrito.length === 0) return;
-    router.push({
-      pathname: "/screens/shop/FormaPago",
-      params: {
-        total: totalGeneral.toFixed(2),
-        carrito: JSON.stringify(carrito),
-        telefono: telefono
-      },
-    });
+
+    const navegar = () => {
+      console.log(`[${new Date().toLocaleTimeString()}] Navegando a FormaPago con total: ${totalGeneral}`);
+      router.push({
+        pathname: "/screens/shop/FormaPago",
+        params: { 
+          total: totalGeneral.toFixed(2),
+          carrito: JSON.stringify(carrito),
+          telefono: telefono,
+          tieneReceta: tieneReceta ? 'true' : 'false',
+          medicamentosReceta: medicamentosReceta,
+          dni: dni
+        },
+      });
+    };
+
+    if (totalGeneral >= 1000) {
+      Alert.alert(
+        t("Hall.ADVERTENCIA_TITULO") || "Aviso de Pago",
+        t("Hall.ADVERTENCIA_MENSAJE") || "Tu pedido supera los 1000€...",
+        [
+          { text: t("Hall.CANCELAR") || "Cancelar", style: "cancel" },
+          { text: t("Hall.ACEPTAR") || "Continuar", onPress: navegar }
+        ]
+      );
+    } else {
+      navegar();
+    }
   };
 
+  /**
+   * Limpia el carrito y vuelve a la pantalla de inicio.
+   */
   const cancelar = () => {
     Alert.alert(
-      "¿Deseas salir?",
-      "Al cerrar la sesión, perderás el progreso de tu compra.",
+      t("Hall.DESEASSALIR"),
+      t("Hall.PERDERPROGRESO"),
       [
-        { text: "Permanecer aquí", style: "cancel" },
+        { text: t("Hall.PERMANECERAQUÍ"), style: "cancel" },
         {
-          text: "Salir",
+          text: t("Hall.SALIR"),
           onPress: () => {
+            console.log(`[${new Date().toLocaleTimeString()}] Cancelando compra y vaciando carrito.`);
             setSinReceta([]);
             setConReceta([]);
             setMedicamentosRecetaSeleccionados(new Set());
@@ -237,31 +339,84 @@ function Hall() {
     );
   };
 
-  const totalGeneral = [...conReceta, ...sinReceta].reduce((total, ci) => total + (ci.medicamento.precio * ci.cantidad), 0);
-  const carrito = [...conReceta, ...sinReceta];
+  // --- Funciones de Traducción de Datos ---
+  const FamiliaTradución = (familia: string): string => {
+    switch (familia.toLowerCase().trim()) {
+      case "gripe y resfriado": return t("Hall.GRIPEYRESFRIADO");
+      case "analgésicos": return t("Hall.ANALGÉSICOS");
+      case "alérgenos": return t("Hall.ALÉRGENOS");
+      case "dieta y nutrición": return t("Hall.DIETAYNUTRICIÓN");
+      case "cuidado del cabello y piel": return t("Hall.CUIDADODELCABELLOYPIEL");
+      case "salud bucal": return t("Hall.SALUDBUSCAL");
+      case "primeros auxilios": return t("Hall.PRIMEROSAUXILIOS");
+      default: return familia;
+    }
+  };
 
+  const MarcaGenericaTradución = (marca: string): string => {
+    switch (marca.toLowerCase().trim()) {
+      case "genérico": return t("Hall.GENERICO");
+      default: return marca;
+    }
+  };
+
+  /**
+   * Renderiza cada elemento dentro de la lista del carrito.
+   * Incluye controles de cantidad para productos sin receta y opción de eliminación.
+   */
   const renderItem = ({ item }: { item: CarritoItem }) => {
     const esSinReceta = sinReceta.some(ci => ci.medicamento.id === item.medicamento.id);
+    
     return (
       <View style={styles.itemCard}>
-        <Image source={{ uri: item.medicamento.img_medicamento?.trim() || "https://via.placeholder.com/70" }} style={styles.itemImage} />
+        <Image 
+          source={{ uri: item.medicamento.img_medicamento?.trim() || "https://via.placeholder.com/70" }} 
+          style={styles.itemImage} 
+        />
         <View style={styles.itemInfo}>
           <Text style={styles.itemName}>{item.medicamento.nombre}</Text>
-          <Text style={styles.itemText}>{item.medicamento.marca}</Text>
-          <Text style={styles.itemText}>Stock: {stock[item.medicamento.id] ?? 0}</Text>
+          <Text style={styles.itemText}>{MarcaGenericaTradución(item.medicamento.marca || "")}</Text>
+          <Text style={styles.itemText}>{t("Hall.STOCK")}: {stock[item.medicamento.id] ?? 0}</Text>
           <Text style={styles.itemPrice}>{item.medicamento.precio.toFixed(2)} €</Text>
         </View>
+
+        {/* Controles de incremento/decremento solo para productos sin receta */}
         {esSinReceta && (
           <View style={{ alignItems: "center", justifyContent: "center", marginRight: 15 }}>
-            <Pressable onPress={() => handleIncrementar(item.medicamento.id)} disabled={item.cantidad >= 5 || (stock[item.medicamento.id] ?? 0) <= 0}>
-              <MaterialIcons name="keyboard-arrow-up" size={28} color={item.cantidad >= 5 ? "#666" : "#fff"} />
+            <Pressable 
+              onPress={() => {
+                console.log(`[${new Date().toLocaleTimeString()}] Incrementando: ${item.medicamento.nombre}`);
+                handleIncrementar(item.medicamento.id);
+              }} 
+              disabled={item.cantidad >= 3 || (stock[item.medicamento.id] ?? 0) <= 0}
+            >
+              <MaterialIcons 
+                name="keyboard-arrow-up" 
+                size={28} 
+                color={(item.cantidad >= 3 || (stock[item.medicamento.id] ?? 0) <= 0) ? "#666" : "#fff"} 
+              />
             </Pressable>
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>{item.cantidad}</Text>
-            <Pressable onPress={() => handleDecrementar(item.medicamento.id)} disabled={item.cantidad <= 1}>
-              <MaterialIcons name="keyboard-arrow-down" size={28} color={item.cantidad <= 1 ? "#666" : "#fff"} />
+
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+              {item.cantidad}
+            </Text>
+
+            <Pressable 
+              onPress={() => {
+                console.log(`[${new Date().toLocaleTimeString()}] Decrementando: ${item.medicamento.nombre}`);
+                handleDecrementar(item.medicamento.id);
+              }} 
+              disabled={item.cantidad <= 1}
+            >
+              <MaterialIcons 
+                name="keyboard-arrow-down" 
+                size={28} 
+                color={item.cantidad <= 1 ? "#666" : "#fff"} 
+              />
             </Pressable>
           </View>
         )}
+
         <Pressable onPress={() => handleRemoveProducto(item.medicamento.id)}>
           <MaterialIcons name="delete" size={24} color="#E63946" />
         </Pressable>
@@ -277,18 +432,17 @@ function Hall() {
         renderItem={renderItem}
         ListHeaderComponent={
           <>
-           {/* SECCIÓN CON RECETA */}
+            {/* --- SECCIÓN: MEDICAMENTOS CON RECETA --- */}
             {tieneReceta && medicamentosRecetaBD.length > 0 ? (
               <View style={[styles.card, { paddingBottom: 0 }]}>
                 <View style={styles.cardHeader}>
                   <View>
-                    <Text style={styles.cardTitle}>CON RECETA</Text>
-                    <Text style={styles.subText}>Medicamentos recetados</Text>
+                    <Text style={styles.cardTitle}>{t("Hall.CONRECETA")}</Text>
+                    <Text style={styles.subText}>{t("Hall.MEDICAMENTOSRECETADOS")}</Text>
                   </View>
                 </View>
                 <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
                   {medicamentosRecetaBD
-                    // ── Ocultamos los ya añadidos al carrito Y los bloqueados localmente
                     .filter(med => !medicamentosRecetaSeleccionados.has(med.id) && !medicamentosBloqueados.has(med.id))
                     .map((med) => (
                       <Pressable
@@ -299,62 +453,74 @@ function Hall() {
                         <View style={{ flex: 1 }}>
                           <Text style={styles.medicamentName}>{med.nombre}</Text>
                           <Text style={styles.medicamentSubtext}>
-                            {med.marca} • {med.familia}
+                            {MarcaGenericaTradución(med.marca || "")} • {FamiliaTradución(med.familia || "")}
                           </Text>
                         </View>
                         <Text style={styles.medicamentPrice}>{med.precio.toFixed(2)} €</Text>
                       </Pressable>
                     ))}
 
-                  {/* ── Mensaje cuando todos los medicamentos están añadidos o bloqueados */}
+                  {/* Feedback visual cuando no quedan recetas pendientes por añadir */}
                   {medicamentosRecetaBD.every(med =>
                     medicamentosRecetaSeleccionados.has(med.id) || medicamentosBloqueados.has(med.id)
                   ) && (
-                    <Text style={{ color: "#4CAF50", textAlign: "center", marginVertical: 8, fontWeight: "bold" }}>
-                      ✅ Todos los medicamentos han sido añadidos al carrito
-                    </Text>
-                  )}
+                      <Text style={{ color: "#4CAF50", textAlign: "center", marginVertical: 8, fontWeight: "bold" }}>
+                        ✅ {t("Hall.MEDICAMENTOSAGREGADOS")}
+                      </Text>
+                    )}
                 </View>
               </View>
             ) : (
-              <Pressable style={styles.card} onPress={() => router.push("/screens/auth/IngresarCartilla")}>
-                <View style={[styles.cardHeader, styles.flecha]}>
+              <Pressable style={styles.card}>
+                <View style={[styles.cardHeader]}>
                   <View>
-                    <Text style={styles.cardTitle}>CON RECETA</Text>
-                    <Text style={styles.subText}>¿Tienes receta?</Text>
+                    <Text style={styles.cardTitle}>{t("Hall.CONRECETA")}</Text>
+                    <Text style={styles.subText}>{t("Hall.TIENESRECETA")}</Text>
                   </View>
-                  <MaterialIcons name="launch" size={24} color="#fff" />
                 </View>
-                <Text style={styles.mediumText}>No hay medicamentos registrados o ingresa tu cartilla</Text>
+                <Text style={styles.mediumText}>{t("Hall.NOHAYRECETA")}</Text>
               </Pressable>
             )}
 
-            {/* SECCIÓN SIN RECETA */}
+            {/* --- SECCIÓN: MEDICAMENTOS SIN RECETA --- */}
             <View style={styles.card2}>
               <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}>SIN RECETA</Text>
+                <Text style={styles.cardTitle}>{t("Hall.SINRECETA")}</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <Pressable style={styles.filterButton} onPress={() => setshowNofilterDrawer(true)}>
                     <MaterialIcons name="add-shopping-cart" size={18} color="#ffffff" />
-                    <Text style={styles.filterText}>Añadir</Text>
+                    <Text style={styles.filterText}>{t("Hall.AÑADIR")}</Text>
                   </Pressable>
                   <Pressable style={styles.filterButton} onPress={() => setShowDrawer(true)}>
                     <MaterialIcons name="filter-list" size={18} color="#ffffff" />
-                    <Text style={styles.filterText}>Filtrar</Text>
+                    <Text style={styles.filterText}>{t("Hall.FILTRAR")}</Text>
                   </Pressable>
                 </View>
               </View>
             </View>
           </>
         }
-        ListFooterComponent={<View style={{ paddingVertical: 20 }}><Text style={styles.totalText}>Total: {totalGeneral.toFixed(2)} €</Text></View>}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        ListFooterComponent={
+          <View style={{ paddingVertical: 20 }}>
+            <Text style={styles.totalText}>
+              {carrito.reduce((acc, ci) => acc + ci.cantidad, 0)} {t("Hall.ARTICULOS")}
+            </Text>
+            <Text style={styles.totalText}>{t("Hall.TOTAL")}: {totalGeneral.toFixed(2)} €</Text>
+          </View>
+        }
+        contentContainerStyle={{ paddingBottom: 170 }}
       />
 
+      {/* --- MODAL: BÚSQUEDA Y FILTRO POR CATEGORÍA --- */}
       <Modal visible={showDrawer} transparent animationType="slide">
         <Pressable style={styles.overlay} onPress={() => setShowDrawer(false)}>
           <View style={styles.drawer}>
-            <TextInput placeholder="Buscar..." value={search} onChangeText={setSearch} style={styles.searchInput} />
+            <TextInput 
+              placeholder={t("Hall.BUSCAR")} 
+              value={search} 
+              onChangeText={setSearch} 
+              style={styles.searchInput} 
+            />
             <ScrollView>
               {Object.entries(medicamentosPorFamilia).map(([familia, meds]) => {
                 const filtrados = meds.filter((m) => m.nombre.toLowerCase().includes(search.toLowerCase()));
@@ -362,22 +528,31 @@ function Hall() {
                 return (
                   <View key={familia}>
                     <Pressable onPress={() => toggleCategory(familia)} style={styles.drawerCategoryButton}>
-                      <Text style={styles.drawerCategory}>{familia}</Text>
+                      <Text style={styles.drawerCategory}>{FamiliaTradución(familia)}</Text>
                       <MaterialIcons name={expandedCategories[familia] ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={20} color="#fff" />
                     </Pressable>
                     {expandedCategories[familia] && filtrados.map((med) => {
                       const stockActual = stock[med.id] ?? med.stock ?? 0;
-                      const bloqueado = sinRecetaIds.has(med.id) || stockActual <= 0;
+                      const bloqueadoPorRateLimit = nombresBloqueadosRateLimit.has(med.nombre.toLowerCase().trim());
+                      const bloqueado = sinRecetaIds.has(med.id) || stockActual <= 0 || bloqueadoPorRateLimit;
+
                       return (
                         <Pressable
                           key={med.id}
                           style={[styles.medicamentCard, bloqueado && { opacity: 0.4 }]}
-                          onPress={() => { if (!bloqueado) { handleAgregarSinReceta(med); setShowDrawer(false); } }}
+                          onPress={() => { 
+                            if (!bloqueado) { 
+                              console.log(`[${new Date().toLocaleTimeString()}] Seleccionado desde filtro: ${med.nombre}`);
+                              handleAgregarSinReceta(med); 
+                              setShowDrawer(false); 
+                            } 
+                          }}
                           disabled={bloqueado}
                         >
                           <View style={{ flex: 1 }}>
                             <Text style={styles.medicamentName}>{med.nombre}</Text>
-                            <Text style={styles.medicamentSubtext}>Stock: {stockActual} • {med.marca}</Text>
+                            {bloqueadoPorRateLimit && <Text style={{color: '#d82215', fontSize: 10}}>⚠️ {t("Hall.LIMITE_ALCANZADO")}</Text>}
+                            <Text style={styles.medicamentSubtext}>{t("Hall.STOCK")}: {stockActual} • {MarcaGenericaTradución(med.marca || "")}</Text>
                           </View>
                           <Text style={styles.medicamentPrice}>{med.precio.toFixed(2)} €</Text>
                         </Pressable>
@@ -391,25 +566,34 @@ function Hall() {
         </Pressable>
       </Modal>
 
+      {/* --- MODAL: AÑADIR SIN FILTRO --- */}
       <Modal visible={showNofilterDrawer} transparent animationType="slide">
         <Pressable style={styles.overlay} onPress={() => setshowNofilterDrawer(false)}>
           <View style={styles.drawer}>
-            <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' }}>Añadir Medicamento</Text>
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' }}>{t("Hall.AÑADIRMEDICAMENTO")}</Text>
             <ScrollView>
               {medicamentosBD.filter((m) => m.nombre.toLowerCase().includes(search.toLowerCase())).map((med) => {
                 const stockActual = stock[med.id] ?? med.stock ?? 0;
-                const yaEnCarrito = sinRecetaIds.has(med.id);
-                const bloqueado = yaEnCarrito || stockActual <= 0;
+                const bloqueadoPorRateLimit = nombresBloqueadosRateLimit.has(med.nombre.toLowerCase().trim());
+                const bloqueado = sinRecetaIds.has(med.id) || stockActual <= 0 || bloqueadoPorRateLimit;
+
                 return (
                   <Pressable
                     key={med.id}
                     style={[styles.medicamentCard, bloqueado && { opacity: 0.4 }]}
-                    onPress={() => { if (bloqueado) return; handleAgregarSinReceta(med); setshowNofilterDrawer(false); setSearch(""); }}
+                    onPress={() => { 
+                      if (bloqueado) return; 
+                      console.log(`[${new Date().toLocaleTimeString()}] Seleccionado sin filtro: ${med.nombre}`);
+                      handleAgregarSinReceta(med); 
+                      setshowNofilterDrawer(false); 
+                      setSearch(""); 
+                    }}
                     disabled={bloqueado}
                   >
                     <View style={{ flex: 1 }}>
                       <Text style={styles.medicamentName}>{med.nombre}</Text>
-                      <Text style={styles.medicamentSubtext}>Stock: {stock[med.id] ?? 100} • {med.marca}</Text>
+                      {bloqueadoPorRateLimit && <Text style={{color: '#d82215', fontSize: 10}}>⚠️ {t("Hall.LIMITE_ALCANZADO")}</Text>}
+                      <Text style={styles.medicamentSubtext}>{t("Hall.STOCK")}: {stockActual} • {MarcaGenericaTradución(med.marca || "")}</Text>
                     </View>
                     <Text style={styles.medicamentPrice}>{med.precio.toFixed(2)} €</Text>
                   </Pressable>
@@ -420,17 +604,17 @@ function Hall() {
         </Pressable>
       </Modal>
 
-      {/* ✅ SECCIÓN DE BOTONES INFERIORES */}
+      {/* --- Botones de compra y cancelación --- */}
       <View style={styles.bottomButtons}>
         <Pressable
           style={[styles.bottomButton, carrito.length === 0 && { opacity: 0.5 }]}
           onPress={comprar}
           disabled={carrito.length === 0}
         >
-          <Text style={styles.bottomButtonText}>COMPRAR</Text>
+          <Text style={styles.bottomButtonText}>{t("Hall.COMPRAR")}</Text>
         </Pressable>
         <Pressable style={styles.bottomButtonVolver} onPress={cancelar}>
-          <Text style={styles.bottomButtonText}>CANCELAR</Text>
+          <Text style={styles.bottomButtonText}>{t("Hall.CANCELAR")}</Text>
         </Pressable>
       </View>
     </View>

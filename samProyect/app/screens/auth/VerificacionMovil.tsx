@@ -1,210 +1,129 @@
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useState, useEffect, useRef } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { firebaseConfig } from "@/config/firebaseConfig";
-import { pacientesService } from "@/services/firebase";
-import { phoneAuthService } from "@/services/firebase";
+import { pacientesService, phoneAuthService } from "@/services/firebase";
 import { styles } from "@/styles/screens/auth/VerificacionMovilStyle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import "@/language/config/ConfigIdiomas";
+import { Pressable, Text, TextInput, View, Image } from "react-native";
 
 function VerificacionMovil() {
-  const params = useLocalSearchParams<{
+  // --- CONFIGURACIÓN Y ESTADOS ---
+  const params = useLocalSearchParams<{ 
+    dni: string; 
+    nombre: string; 
     cartilla: string;
-    dni: string;
-    nombre: string;
-    tipo: string;
     telefono: string;
+    tipo: string;
   }>();
-
+  const { t } = useTranslation();
   const recaptchaVerifier = useRef(null);
 
   const [TLF, setTLF] = useState("");
-  const [Error, setError] = useState("");
-  // ✅ Cambiado Verificar por loading para ser igual a IngresarCartilla
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [intentos, setIntentos] = useState(0);
   const [segundosBloqueo, setSegundosBloqueo] = useState(0);
 
-  // --- LÓGICA DE BLOQUEO TEMPORAL ---
+  /** Revisa si existe bloqueo persistente por fallos previos */
   useEffect(() => {
-    const revisarBloqueo = async () => {
+    const revisar = async () => {
       const stored = await AsyncStorage.getItem(`bloqueo_4digitos_${params.cartilla}`);
       if (stored) {
         const { expiracion } = JSON.parse(stored);
         const ahora = Date.now();
-        if (ahora < expiracion) {
-          setSegundosBloqueo(Math.round((expiracion - ahora) / 1000));
-        } else {
-          await AsyncStorage.removeItem(`bloqueo_4digitos_${params.cartilla}`);
-        }
+        if (ahora < expiracion) setSegundosBloqueo(Math.round((expiracion - ahora) / 1000));
       }
     };
-    if (params.cartilla) revisarBloqueo();
+    revisar();
   }, [params.cartilla]);
 
+  /** Contador del temporizador de bloqueo */
   useEffect(() => {
     if (segundosBloqueo <= 0) return;
-    const interval = setInterval(() => {
-      setSegundosBloqueo(prev => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
+    const interval = setInterval(() => setSegundosBloqueo(prev => (prev <= 1 ? 0 : prev - 1)), 1000);
     return () => clearInterval(interval);
   }, [segundosBloqueo]);
 
-  const cambios = (text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, "");
-    if (cleaned.length <= 4) setTLF(cleaned);
-  };
-
-  const formatearTiempo = (segundos: number) => {
-    const minutos = Math.floor(segundos / 60);
-    const secs = segundos % 60;
-    return `${minutos}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // --- FUNCIÓN PRINCIPAL ---
+  /** Ejecuta la validación de dígitos y el envío del SMS de Firebase */
   const aceptar = async () => {
-    // ✅ Bloqueo de seguridad igual a IngresarCartilla
     if (loading || segundosBloqueo > 0) return;
-
+    const ts = new Date().toLocaleTimeString();
     setLoading(true);
-    setError("");
 
     try {
-      console.log("🔍 Validando últimos 4 dígitos...");
+      console.log(`[${ts}] Validando teléfono para cartilla: ${params.cartilla}`);
+      const res = await pacientesService.validarPorCartillaYTelefono(params.cartilla, TLF);
 
-      const VERIFICACION = await pacientesService.validarPorCartillaYTelefono(
-        params.cartilla.trim(),
-        TLF
-      );
-
-      if (!VERIFICACION.valido) {
-        const nuevosIntentos = intentos + 1;
-        setIntentos(nuevosIntentos);
-
-        if (nuevosIntentos >= 3) {
-          const expiracion = Date.now() + 60000;
-          await AsyncStorage.setItem(
-            `bloqueo_4digitos_${params.cartilla}`,
-            JSON.stringify({ expiracion })
-          );
-          setSegundosBloqueo(60);
-          setIntentos(0);
-          setError(""); // Limpio para que se vea solo el timer
-        } else {
-          setError(`Dígitos incorrectos. Intento ${nuevosIntentos} de 3`);
-        }
+      if (!res.valido) {
+        console.log(`[${ts}] Teléfono incorrecto.`);
+        setError(t("VerificacionMovil.ERROR1"));
         setLoading(false);
         return;
       }
 
-      console.log("🔐 Dígitos válidos, iniciando ReCAPTCHA...");
-
-      try {
-        const otpResult = await phoneAuthService.generarOTP(
-          params.telefono,
-          recaptchaVerifier.current
-        );
-
-        if (otpResult.exito) {
-          console.log("✅ SMS enviado");
-          router.push({
-            pathname: "/screens/auth/VerificacionOTP",
-            params: { ...params },
-          });
-        }
-        // Nota: Si no hay éxito o se cancela, el 'finally' se encargará de quitar el loading
-      } catch (e: any) {
-        console.log(" ReCAPTCHA cancelado o error");
-      }
+      console.log(`[${ts}] Validado. Enviando SMS OTP...`);
+      const otp = await phoneAuthService.generarOTP(params.telefono, recaptchaVerifier.current);
+      if (otp.exito) router.push({ 
+          pathname: "/screens/auth/VerificacionOTP", 
+          params: { 
+              ...params,                    
+              dni: res.paciente?.DNI ?? '',    
+              nombre: res.paciente?.Nombre_Paciente ?? '',
+              tipo: res.paciente?.Tipo_Paciente ?? '',
+          } 
+      });
 
     } catch (e: any) {
-      console.log("⚠️ Error:", e.message);
-      setError("Error de conexión");
+      console.error(`[${ts}] Error:`, e.message);
+      setError(t("VerificacionMovil.ERROR2"));
     } finally {
-      // ✅ Siempre quitamos el loading al terminar el proceso (igual que IngresarCartilla)
       setLoading(false);
     }
   };
 
-  const cancelar = () => {
-    // ✅ Si está cargando, no permitimos interactuar
-    if (loading) return;
-
-    Alert.alert(
-      "¿Deseas salir?",
-      "Al cerrar la sesión, perderás el progreso de tu identificación teniendo que iniciarlo de nuevo.",
-      [
-        {
-          text: "Permanecer aquí",
-          style: "cancel",
-        },
-        {
-          text: "Salir",
-          style: "destructive",
-          // Usamos replace para limpiar el historial de navegación
-          onPress: () => router.replace("/screens/auth/IngresarCartilla"),
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
+  // --- ESTRUCTURA DE INTERFAZ (UI) ---
   return (
     <View style={styles.container}>
-      <FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifier}
-        firebaseConfig={firebaseConfig}
-        attemptInvisibleVerification={true}
-        languageCode="es"
+      {/* Componente Invisible de Firebase para ReCAPTCHA */}
+      <FirebaseRecaptchaVerifierModal 
+        ref={recaptchaVerifier} 
+        firebaseConfig={firebaseConfig} 
+        attemptInvisibleVerification={true} 
       />
 
-      <Text style={styles.title}>Ingresa los últimos 4 dígitos de tu teléfono</Text>
-
-      <TextInput
-        placeholder="••••"
-        value={TLF}
-        onChangeText={cambios}
-        style={[
-          styles.input,
-        ]}
-        secureTextEntry={true}
-        maxLength={4}
-        keyboardType="numeric"
+      <Text style={styles.title}>{t("VerificacionMovil.INGRESAR")}</Text>
+      
+      <Image 
+        source={require('@/assets/images/tlfLogo.webp')} 
+        style={{ width: '85%', height: 160, resizeMode: 'contain', marginBottom: 24 }} 
       />
 
-      {segundosBloqueo > 0 && (
-        <Text style={styles.timerText}>
-          Sistema bloqueado {segundosBloqueo}s
-        </Text>
-      )}
+      {/* Campo de entrada de teléfono */}
+      <TextInput 
+        placeholder="Tu_teléfono" 
+        value={TLF} 
+        onChangeText={v => setTLF(v.replace(/[^0-9]/g, "").slice(0, 9))} 
+        style={styles.input} 
+        keyboardType="numeric" 
+      />
 
-      {Error !== "" && segundosBloqueo === 0 && (
-        <Text style={styles.error}>{Error}</Text>
-      )}
+      {/* Feedback de Bloqueo/Error */}
+      {segundosBloqueo > 0 && <Text style={styles.timerText}>{t("VerificacionMovil.BLOQUEADO")} {segundosBloqueo}s</Text>}
+      {error !== "" && <Text style={styles.error}>{error}</Text>}
 
+      {/* Botones principales */}
       <View style={styles.VerificacionMovilContainer}>
-        <Pressable
-          style={[
-            styles.button,
-            (loading || TLF.length !== 4 || segundosBloqueo > 0) && {
-              opacity: 0.5,
-            },
-          ]}
+        <Pressable 
+          style={[styles.button, (loading || TLF.length !== 9 || segundosBloqueo > 0) && { opacity: 0.5 }]} 
           onPress={aceptar}
-          disabled={loading || TLF.length !== 4 || segundosBloqueo > 0}
         >
-          <Text style={styles.buttonText}>
-            {segundosBloqueo > 0
-              ? `BLOQUEADO ${formatearTiempo(segundosBloqueo)}`
-              : loading
-                ? 'VALIDANDO...'
-                : 'ACEPTAR'}
-          </Text>
+          <Text style={styles.buttonText}>{loading ? t("VerificacionMovil.VALIDANDO") : t("VerificacionMovil.ACEPTAR")}</Text>
         </Pressable>
 
-        <Pressable style={[styles.button, styles.buttonCancel]} onPress={cancelar} disabled={loading}>
-          <Text style={styles.buttonText}>CANCELAR</Text>
+        <Pressable style={[styles.button, styles.buttonCancel]} onPress={() => router.replace("/screens/auth/IngresarCartilla")}>
+          <Text style={styles.buttonText}>{t("VerificacionMovil.CANCELAR")}</Text>
         </Pressable>
       </View>
     </View>

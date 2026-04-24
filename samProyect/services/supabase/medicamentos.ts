@@ -1,7 +1,3 @@
-// ============================================
-// services/supabase/medicamentos.service.ts
-// ============================================
-
 import { supabase } from '@/config/supabaseClient';
 
 export interface Medicamento {
@@ -16,6 +12,9 @@ export interface Medicamento {
   img_medicamento?: string;
 }
 
+/**
+ * Normaliza los nombres de campos de la base de datos a la interfaz de la aplicación
+ */
 const mapearMedicamento = (m: any): Medicamento => ({
   id: m.ID_Medicamento,
   nombre: m.Nombre,
@@ -24,87 +23,69 @@ const mapearMedicamento = (m: any): Medicamento => ({
   familia: m.Familia,
   descripcion: m.Descripcion,
   stock: m.Stock,
-  tipo: m.Tipo || [],
+  tipo: typeof m.Tipo === 'string' ? [m.Tipo] : (m.Tipo || []),
   img_medicamento: m.img_medicamento,
 });
 
 export const medicamentosService = {
 
-  // ✅ Obtener TODOS los medicamentos
+  /**
+   * Obtiene todos los medicamentos marcados como activos
+   */
   async obtenerTodos(): Promise<Medicamento[]> {
     try {
-      console.log("📊 Obteniendo TODOS los medicamentos...");
+      console.log(`[${new Date().toLocaleTimeString()}] [medicamentosService] Cargando catálogo completo...`);
+      const { data, error } = await supabase.from('Medicamentos').select('*').eq('Activo', true);
 
-      const { data, error } = await supabase
-        .from('Medicamentos')
-        .select('*')
-        .eq('Activo', true);
-
-      if (error) {
-        console.error("❌ Error Supabase:", error.message);
-        return [];
-      }
-
-      console.log("✅ Total medicamentos en Supabase:", data?.length);
+      if (error) throw error;
       return (data || []).map(mapearMedicamento);
-
     } catch (error: any) {
-      console.error("❌ Error:", error.message);
+      console.error(`[${new Date().toLocaleTimeString()}] [medicamentosService] Error:`, error.message);
       return [];
     }
   },
 
+  /**
+   * Filtra medicamentos de venta libre
+   */
   async obtenerSinReceta(): Promise<Medicamento[]> {
-    try {
-      console.log("💊 Obteniendo medicamentos SIN receta...");
-
-      const { data, error } = await supabase
-        .from('Medicamentos')
-        .select('*')
-        .eq('Activo', true)
-        .contains('Tipo', ['sin_receta']);
-
-      if (error) {
-        console.error("❌ Error:", error.message);
+      try {
+        const { data, error } = await supabase
+          .from('Medicamentos')
+          .select('*')
+          .eq('Activo', true)
+          .ilike('Tipo', '%sin_receta%'); 
+        if (error) throw error;
+        return (data || []).map(mapearMedicamento);
+      } catch (error: any) {
+        console.error(`[${new Date().toLocaleTimeString()}] [medicamentosService] Error en consulta sin receta:`, error.message);
         return [];
       }
-
-      console.log("✅ Medicamentos sin receta:", data?.length);
-      return (data || []).map(mapearMedicamento);
-
-    } catch (error: any) {
-      console.error("❌ Error:", error.message);
-      return [];
-    }
   },
 
+  /**
+   * Filtra medicamentos con receta
+   */
   async obtenerConReceta(): Promise<Medicamento[]> {
-    try {
-      console.log("📋 Obteniendo medicamentos CON receta...");
-
-      const { data, error } = await supabase
-        .from('Medicamentos')
-        .select('*')
-        .eq('Activo', true)
-        .contains('Tipo', ['con_receta']);
-
-      if (error) {
-        console.error("❌ Error:", error.message);
+      try {
+        const { data, error } = await supabase
+          .from('Medicamentos')
+          .select('*')
+          .eq('Activo', true)
+          .ilike('Tipo', '%con_receta%'); // ← texto parcial
+        if (error) throw error;
+        return (data || []).map(mapearMedicamento);
+      } catch (error: any) {
+        console.error(`[${new Date().toLocaleTimeString()}] [medicamentosService] Error en consulta con receta:`, error.message);
         return [];
       }
-
-      console.log("✅ Medicamentos con receta:", data?.length);
-      return (data || []).map(mapearMedicamento);
-
-    } catch (error: any) {
-      console.error("❌ Error:", error.message);
-      return [];
-    }
   },
 
+  /**
+   * Actualiza el inventario restando la cantidad vendida
+   */
   async actualizarStock(id: string, cantidadARestar: number): Promise<void> {
     try {
-      // 1. Obtener el stock actual directamente de la base de datos
       const { data, error: fetchError } = await supabase
         .from('Medicamentos')
         .select('Stock')
@@ -113,10 +94,8 @@ export const medicamentosService = {
 
       if (fetchError) throw fetchError;
 
-      const stockActual = data.Stock || 0;
-      const nuevoStock = stockActual - cantidadARestar;
+      const nuevoStock = (data.Stock || 0) - cantidadARestar;
 
-      // 2. Realizar el update con el nuevo valor calculado
       const { error: updateError } = await supabase
         .from('Medicamentos')
         .update({ Stock: nuevoStock })
@@ -124,11 +103,10 @@ export const medicamentosService = {
 
       if (updateError) throw updateError;
 
-      console.log(`✅ Stock actualizado para ID ${id}: ${stockActual} -> ${nuevoStock}`);
+      console.log(`[${new Date().toLocaleTimeString()}] [medicamentosService] Stock actualizado ID ${id} a ${nuevoStock}`);
     } catch (error: any) {
-      console.error("❌ Error actualizando stock en Supabase:", error.message);
+      console.error(`[${new Date().toLocaleTimeString()}] [medicamentosService] Fallo al actualizar stock:`, error.message);
       throw error;
     }
   },
-
 };

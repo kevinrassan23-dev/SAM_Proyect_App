@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.textPrimary,
     marginBottom: theme.spacing(2),
     textAlign: 'left',
-    paddingLeft: 70, // Ajusta este número hasta que el primer '0' se vea donde quieres
+    paddingLeft: 70,
     letterSpacing: 15,
   },
 
@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
   },
 
   errorTextCustom: {
-    color: theme.colors.error, // Usando el color rojo del tema
+    color: theme.colors.error, 
     fontSize: theme.fontSize.small,
     marginTop: 5,
     textAlign: 'center',

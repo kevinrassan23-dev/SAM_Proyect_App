@@ -87,13 +87,13 @@ export const styles = StyleSheet.create({
     },
 
     timerText: {
-        color: theme.colors.error, // Rojo según tu tema
+        color: theme.colors.error, 
         fontSize: theme.fontSize.normal,
         fontWeight: "bold",
         textAlign: "center",
         marginBottom: theme.spacing(2),
     },
-    // Asegúrate de que el input tenga un estilo visual claro de deshabilitado
+
     inputDisabled: {
         backgroundColor: "#F0F0F0",
         borderColor: "#CCC",

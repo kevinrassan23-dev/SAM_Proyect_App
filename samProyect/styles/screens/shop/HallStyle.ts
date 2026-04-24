@@ -35,13 +35,6 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
     },
 
-    flecha:{
-        flexDirection: "row", 
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingVertical: 8,
-    },
-
     cardHeaderRow: {
         backgroundColor: theme.colors.secondary,
         padding: theme.spacing(1.5),

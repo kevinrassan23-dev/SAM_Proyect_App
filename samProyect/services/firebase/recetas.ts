@@ -1,57 +1,41 @@
-// ============================================
-// services/firebase/recetas.service.ts
-// ============================================
-
 import { db } from '@/config/firebaseConfig';
-import { collection, getDocs, query, where, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
-// ─────────────────────────────────────────────
-// Clave de AsyncStorage para persistir bloqueos
-// ─────────────────────────────────────────────
 const CLAVE_BLOQUEADAS = 'recetas_bloqueadas';
 
-// Estructura de cada bloqueo guardado localmente
 interface RecetaBloqueada {
-  idReceta: string;       // ID del documento en Firestore
-  idsMedicamentos: string[]; // IDs de los medicamentos bloqueados
-  expiraEn: number;       // Date.now() + 1 hora en ms
+  idReceta: string;
+  idsMedicamentos: string[];
+  expiraEn: number;
 }
 
 export const recetasService = {
 
-  // ─────────────────────────────────────────────
-  // BLOQUEO LOCAL: Llama esto desde Confirmación
-  // al finalizar el pedido. Guarda el bloqueo 1 hora
-  // en AsyncStorage sin tocar Firebase.
-  // ─────────────────────────────────────────────
+  /**
+   * Registra un bloqueo de 1 hora en el dispositivo local para evitar compras duplicadas
+   */
   async bloquearRecetaLocal(idReceta: string, idsMedicamentos: string[]): Promise<void> {
     try {
       const raw = await AsyncStorage.getItem(CLAVE_BLOQUEADAS);
       const existentes: RecetaBloqueada[] = raw ? JSON.parse(raw) : [];
-
-      // 1 hora desde ahora en milisegundos
       const expiraEn = Date.now() + 3600 * 1000;
 
-      // Si ya existía un bloqueo para esta receta lo reemplazamos,
-      // si no existía lo añadimos
-      const actualizado: RecetaBloqueada[] = [
+      const actualizado = [
         ...existentes.filter(r => r.idReceta !== idReceta),
         { idReceta, idsMedicamentos, expiraEn }
       ];
 
       await AsyncStorage.setItem(CLAVE_BLOQUEADAS, JSON.stringify(actualizado));
-      console.log("🔒 Receta bloqueada localmente hasta:", new Date(expiraEn).toLocaleTimeString());
+      console.log(`[${new Date().toLocaleTimeString()}] [recetasService] Bloqueo local guardado hasta: ${new Date(expiraEn).toLocaleTimeString()}`);
     } catch (error: any) {
-      console.error("❌ Error al bloquear receta local:", error.message);
+      console.error(`[${new Date().toLocaleTimeString()}] [recetasService] Error bloqueo local:`, error.message);
     }
   },
 
-  // ─────────────────────────────────────────────
-  // CONSULTA LOCAL: Llama esto desde Hall al cargar
-  // para saber qué medicamentos mostrar como disabled.
-  // Devuelve solo los IDs cuyo bloqueo no ha expirado.
-  // ─────────────────────────────────────────────
+  /**
+   * Retorna lista de IDs de medicamentos bloqueados por compras recientes
+   */
   async obtenerMedicamentosBloqueados(): Promise<string[]> {
     try {
       const raw = await AsyncStorage.getItem(CLAVE_BLOQUEADAS);
@@ -60,150 +44,95 @@ export const recetasService = {
       const todas: RecetaBloqueada[] = JSON.parse(raw);
       const ahora = Date.now();
 
-      // Filtramos bloqueos vigentes y aplanamos sus IDs de medicamentos
-      return todas
-        .filter(r => r.expiraEn > ahora)
-        .flatMap(r => r.idsMedicamentos);
+      return todas.filter(r => r.expiraEn > ahora).flatMap(r => r.idsMedicamentos);
     } catch (error: any) {
-      console.error("❌ Error al leer bloqueos locales:", error.message);
       return [];
     }
   },
 
-  // ─────────────────────────────────────────────
-  // LIMPIEZA: Elimina bloqueos ya expirados de
-  // AsyncStorage. Llámalo al iniciar Hall para no
-  // acumular entradas antiguas.
-  // ─────────────────────────────────────────────
+  /**
+   * Limpia registros de bloqueo expirados de la memoria local
+   */
   async limpiarBloqueosCaducados(): Promise<void> {
     try {
       const raw = await AsyncStorage.getItem(CLAVE_BLOQUEADAS);
       if (!raw) return;
 
-      const todas: RecetaBloqueada[] = JSON.parse(raw);
       const ahora = Date.now();
-
-      // Solo conservamos los que siguen dentro de la hora de bloqueo
-      const vigentes = todas.filter(r => r.expiraEn > ahora);
+      const vigentes = (JSON.parse(raw) as RecetaBloqueada[]).filter(r => r.expiraEn > ahora);
       await AsyncStorage.setItem(CLAVE_BLOQUEADAS, JSON.stringify(vigentes));
-    } catch (error: any) {
-      console.error("❌ Error al limpiar bloqueos caducados:", error.message);
-    }
+    } catch (error: any) {}
   },
 
+  /**
+   * Obtiene recetas activas desde Firestore para un paciente específico
+   */
   async obtenerPorDNI(dni: string): Promise<any[]> {
     try {
-      console.log("📋 Buscando recetas del paciente:", dni);
+      console.log(`[${new Date().toLocaleTimeString()}] [recetasService] Consultando recetas para DNI: ${dni}`);
+      const q = query(collection(db, 'RECETAS'), where('DNI_Paciente', '==', dni.trim()));
+      const snapshot = await getDocs(q);
 
-      const snapshot = await getDocs(
-        query(
-          collection(db, 'RECETAS'),
-          where('DNI_Paciente', '==', dni.trim())
-        )
-      );
-
-      // Solo devolvemos recetas donde Activa === true (booleano).
-      // El bloqueo temporal de 1 hora tras la compra se gestiona
-      // únicamente con AsyncStorage, sin campos extra en Firestore.
-      const recetas = snapshot.docs
-        .map(docSnapshot => ({ id: docSnapshot.id, ...docSnapshot.data() }))
-        .filter((receta: any) => receta.Activa === true);
-
-      return recetas;
-
+      return snapshot.docs
+        .map(ds => ({ id: ds.id, ...ds.data() }))
+        .filter((r: any) => r.Activa === true);
     } catch (error: any) {
-      console.error("❌ Error:", error.message);
+      console.error(`[${new Date().toLocaleTimeString()}] [recetasService] Error en obtenerPorDNI:`, error.message);
       return [];
     }
   },
 
-  // Reservado para cuando quieras escribir en Firebase.
-  // Por ahora no se llama desde ningún sitio.
-  async desactivarReceta(idReceta: string): Promise<void> {
-    try {
-      console.log("🔒 Bloqueando receta por 1 hora en Firebase...");
-      const docRef = doc(db, 'RECETAS', idReceta);
-
-      const ahoraS = Math.floor(Date.now() / 1000);
-      const unaHoraDespues = new Timestamp(ahoraS + 3600, 0);
-
-      await updateDoc(docRef, {
-        Activa: false,
-        fecha_uso: Timestamp.now(),
-        expira_en: unaHoraDespues,
-        updatedAt: Timestamp.now()
-      });
-
-      console.log("✅ Receta desactivada en Firebase");
-    } catch (error: any) {
-      console.error("❌ Error al desactivar receta:", error.message);
-    }
-  },
-
-  async tieneRecetaActiva(dni: string): Promise<boolean> {
-    try {
-      const recetas = await this.obtenerPorDNI(dni);
-      return recetas.length > 0;
-    } catch (error: any) {
-      console.error("❌ Error:", error.message);
-      return false;
-    }
-  },
-
+  /**
+   * Obtiene y cruza los medicamentos de las recetas del paciente con el stock de Supabase.
+   * ── Usa Medicamentos_Recetados (mayúscula) que es el campo real de Firestore.
+   * ── Soporta tanto string simple como array de strings separados por comas.
+   */
   async obtenerMedicamentosReceta(dni: string): Promise<any[]> {
     try {
-      console.log("💊 Obteniendo medicamentos de receta para DNI:", dni);
-
       const recetas = await this.obtenerPorDNI(dni);
-
-      if (recetas.length === 0) {
-        console.log("❌ Sin recetas activas para este paciente");
-        return [];
-      }
+      if (recetas.length === 0) return [];
 
       const nombresRecetados = new Set<string>();
 
-      recetas.forEach(receta => {
-        if (receta.medicamentos_recetados) {
-          // medicamentos_recetados puede ser string o array de strings
-          const meds = Array.isArray(receta.medicamentos_recetados)
-            ? receta.medicamentos_recetados
-            : [receta.medicamentos_recetados];
+      recetas.forEach(r => {
+        // ── Campo con mayúscula tal como está en Firestore
+        const raw = r.Medicamentos_Recetados;
+        if (!raw) return;
 
-          meds.forEach((nombre: string) => {
-            nombresRecetados.add(nombre.toLowerCase().trim());
-          });
-        }
+        // ── Soporta string con comas ("Med1, Med2") o array directo
+        const lista: string[] = Array.isArray(raw)
+          ? raw
+          : raw.split(',').map((n: string) => n.trim());
+
+        lista
+          .filter((n: string) => n && n.trim() !== '')
+          .forEach((n: string) => nombresRecetados.add(n.toLowerCase().trim()));
       });
+
+      if (nombresRecetados.size === 0) return [];
 
       const { medicamentosService } = await import('@/services/supabase/medicamentos');
-      const todosMedicamentos = await medicamentosService.obtenerTodos();
+      const todosMeds = await medicamentosService.obtenerTodos();
 
-      const medicamentosRecetados: any[] = [];
+      return todosMeds
+        .filter(m => m.nombre && nombresRecetados.has(m.nombre.toLowerCase().trim()))
+        .map(m => {
+          const rOrig = recetas.find(r => {
+            const raw = r.Medicamentos_Recetados;
+            if (!raw) return false;
 
-      todosMedicamentos.forEach(med => {
-        const nombreNorm = med.nombre.toLowerCase().trim();
-        if (nombresRecetados.has(nombreNorm)) {
-          // Inyectamos el idReceta para usarlo en bloquearRecetaLocal
-          // desde la pantalla de Confirmación
-          const recetaOriginal = recetas.find(r => {
-            const rMeds = Array.isArray(r.medicamentos_recetados)
-              ? r.medicamentos_recetados.map((n: string) => n.toLowerCase())
-              : [r.medicamentos_recetados.toLowerCase()];
-            return rMeds.includes(nombreNorm);
+            const list: string[] = Array.isArray(raw)
+              ? raw
+              : raw.split(',').map((n: string) => n.trim());
+
+            return list.some((ln: string) =>
+              ln && ln.toLowerCase().trim() === m.nombre.toLowerCase().trim()
+            );
           });
-
-          medicamentosRecetados.push({
-            ...med,
-            idReceta: recetaOriginal?.id
-          });
-        }
-      });
-
-      return medicamentosRecetados;
-
+          return { ...m, idReceta: rOrig?.id };
+        });
     } catch (error: any) {
-      console.error("❌ Error:", error.message);
+      console.error(`[${new Date().toLocaleTimeString()}] [recetasService] Error en obtenerMedicamentosReceta:`, error.message);
       return [];
     }
   }

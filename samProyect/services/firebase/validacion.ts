@@ -1,80 +1,56 @@
-// ============================================
-// services/firebase/validacion.service.ts (COMPLETO)
-// ============================================
-
+import { descuentosService } from '@/services/supabase/descuentos';
 import { pacientesService } from './pacientes';
 import { recetasService } from './recetas';
-import { descuentosService } from '@/services/supabase/descuentos';
 
 export const validacionService = {
 
+  /**
+   * Valida formato de cartilla: 8 dígitos + 1 letra
+   */
   validarFormatoCartilla(cartilla: string): { valido: boolean; error: string } {
-    if (!cartilla || !cartilla.trim()) {
-      return { valido: false, error: "La cartilla no puede estar vacía" };
-    }
-
-    const cartillaLimpia = cartilla.trim().toUpperCase();
+    if (!cartilla?.trim()) return { valido: false, error: "Campo obligatorio" };
     const regex = /^[0-9]{8}[A-Z]$/;
-
-    if (!regex.test(cartillaLimpia)) {
-      return { 
-        valido: false, 
-        error: "Formato inválido. Debe ser: 8 números + 1 letra (ej: 12345678P)" 
-      };
-    }
-
-    return { valido: true, error: "" };
+    return regex.test(cartilla.trim().toUpperCase()) 
+      ? { valido: true, error: "" } 
+      : { valido: false, error: "Formato: 8 números + 1 letra" };
   },
 
-  validarFormatoContraseña(contraseña: string): { valido: boolean; error: string } {
-    if (!contraseña || !contraseña.trim()) {
-      return { valido: false, error: "La contraseña no puede estar vacía" };
-    }
-
-    const contraseñaLimpia = contraseña.trim();
+  /**
+   * Valida PIN/Contraseña de 4 dígitos
+   */
+  validarFormatoContraseña(pass: string): { valido: boolean; error: string } {
+    if (!pass?.trim()) return { valido: false, error: "Campo obligatorio" };
     const regex = /^[0-9]{4}$/;
-
-    if (!regex.test(contraseñaLimpia)) {
-      return { 
-        valido: false, 
-        error: "Formato inválido. Debe ser exactamente 4 dígitos" 
-      };
-    }
-
-    return { valido: true, error: "" };
+    return regex.test(pass.trim()) 
+      ? { valido: true, error: "" } 
+      : { valido: false, error: "Debe ser de 4 dígitos" };
   },
 
-  // ✅ NUEVO: Obtener datos completos del paciente
-  async obtenerDatosPacienteCompleto(dni: string): Promise<{
-    paciente?: any;
-    recetas?: any[];
-    medicamentosReceta?: string[];
-    descuento?: any;
-    tieneReceta?: boolean;
-    error?: string;
-  }> {
+  /**
+   * Recopila toda la información necesaria del paciente en una sola llamada
+   */
+  async obtenerDatosPacienteCompleto(dni: string): Promise<any> {
     try {
-      console.log("📊 Obteniendo datos completos del paciente:", dni);
+      console.log(`[${new Date().toLocaleTimeString()}] [validacionService] Recopilando perfil completo DNI: ${dni}`);
 
       const paciente = await pacientesService.obtenerPorDNI(dni);
-      if (!paciente) {
-        return { error: 'Paciente no encontrado' };
-      }
+      if (!paciente) return { error: 'Paciente no encontrado' };
 
-      const recetas = await recetasService.obtenerPorDNI(dni);
-      const tieneReceta = recetas.length > 0;
-      const medicamentosReceta = await recetasService.obtenerMedicamentosReceta(dni);
-      const descuento = await descuentosService.obtenerPorTipoPaciente(paciente.Tipo_Paciente);
+      const [recetas, medicamentosReceta, descuento] = await Promise.all([
+        recetasService.obtenerPorDNI(dni),
+        recetasService.obtenerMedicamentosReceta(dni),
+        descuentosService.obtenerPorTipoPaciente(paciente.Tipo_Paciente)
+      ]);
 
       return {
         paciente,
         recetas,
         medicamentosReceta,
         descuento,
-        tieneReceta
+        tieneReceta: recetas.length > 0
       };
-
     } catch (error: any) {
+      console.error(`[${new Date().toLocaleTimeString()}] [validacionService] Error:`, error.message);
       return { error: error.message };
     }
   }

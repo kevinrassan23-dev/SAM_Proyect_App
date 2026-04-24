@@ -1,111 +1,68 @@
-import {
-  PhoneAuthProvider,
-  signInWithCredential,
-} from 'firebase/auth';
 import { auth } from '@/config/firebaseConfig';
+import { PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
 
 let verificationId: string = '';
 
 export const phoneAuthService = {
+  
   /**
-   * Enviar OTP por SMS
-   * @param telefono - Número con código país (+34666666667)
-   * @param recaptchaVerifier - Ref del FirebaseRecaptchaVerifierModal de Expo
+   * Inicia el proceso de envío de SMS mediante Firebase
    */
   async generarOTP(telefono: string, recaptchaVerifier: any): Promise<any> {
     try {
-      if (!telefono) {
-        throw new Error('Teléfono requerido');
-      }
+      if (!telefono || !recaptchaVerifier) throw new Error('Parámetros insuficientes para SMS');
 
-      if (!recaptchaVerifier) {
-        throw new Error('ReCAPTCHA verifier no disponible');
-      }
-
-      console.log(`📱 Solicitando código para: ${telefono}`);
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Solicitando SMS para: ${telefono}`);
 
       const provider = new PhoneAuthProvider(auth);
-      
-      verificationId = await provider.verifyPhoneNumber(
-        telefono,
-        recaptchaVerifier
-      );
+      verificationId = await provider.verifyPhoneNumber(telefono, recaptchaVerifier);
 
-      console.log('✅ Proceso de verificación iniciado');
-
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Verificación enviada exitosamente`);
       return { exito: true, verificationId };
-    } catch (error: any) {
-      // ✅ ELIMINADO EL LOG DE ERROR: Solo registramos que se canceló o falló sin alarmar
-      const isCancel = error.code === 'auth/captcha-check-failed' || error.message?.includes('cancel');
-      
-      if (isCancel) {
-        console.log('ℹ️ Verificación cancelada por el usuario');
-      } else {
-        console.log('ℹ️ Info Firebase SMS:', error.code);
-      }
 
-      return {
-        exito: false,
-        mensaje: error.message || 'Error al enviar SMS',
-        code: error.code,
-      };
+    } catch (error: any) {
+      const isCancel = error.code === 'auth/captcha-check-failed' || error.message?.includes('cancel');
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Info: ${isCancel ? 'Cancelado por usuario' : error.code}`);
+      
+      return { exito: false, mensaje: error.message, code: error.code };
     }
   },
 
   /**
-   * Verificar código OTP de 6 dígitos
+   * Valida el código OTP recibido y loguea al usuario
    */
   async verificarOTP(codigoOTP: string): Promise<any> {
     try {
-      if (!verificationId) {
-        throw new Error('No hay sesión activa.');
-      }
+      if (!verificationId) throw new Error('Sesión de verificación expirada');
+      if (!codigoOTP || codigoOTP.length !== 6) throw new Error('Código inválido');
 
-      if (!codigoOTP || codigoOTP.length !== 6) {
-        throw new Error('Código no válido');
-      }
-
-      const credential = PhoneAuthProvider.credential(
-        verificationId,
-        codigoOTP
-      );
-
+      const credential = PhoneAuthProvider.credential(verificationId, codigoOTP);
       const resultado = await signInWithCredential(auth, credential);
 
-      console.log('✅ Identidad confirmada');
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Identidad confirmada para UID: ${resultado.user.uid}`);
       verificationId = ''; 
 
-      return {
-        valido: true,
-        usuario: resultado.user,
-        mensaje: 'Verificación completada',
-      };
+      return { valido: true, usuario: resultado.user, mensaje: 'OK' };
     } catch (error: any) {
-      // ✅ CAMBIADO: console.error por un log discreto
-      console.log('ℹ️ Intento de OTP fallido:', error.code);
-      return {
-        valido: false,
-        mensaje: error.message || 'Código incorrecto',
-      };
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Fallo en OTP: ${error.code}`);
+      return { valido: false, mensaje: error.message };
     }
   },
 
+  /**
+   * Cierra la sesión activa en Firebase Auth
+   */
   async logout(): Promise<void> {
     try {
       await auth.signOut();
       verificationId = '';
-      console.log('✅ Sesión finalizada');
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Sesión cerrada`);
     } catch (error: any) {
-      // ✅ SILENCIADO: Solo log informativo
-      console.log('ℹ️ Info Logout:', error.message);
+      console.log(`[${new Date().toLocaleTimeString()}] [phoneAuth] Info Logout:`, error.message);
     }
   },
 
-  getCurrentUser() {
-    return auth.currentUser;
-  },
+  getCurrentUser() { return auth.currentUser; },
 
-  resetVerification(): void {
-    verificationId = '';
-  },
+  resetVerification(): void { verificationId = ''; }
 };

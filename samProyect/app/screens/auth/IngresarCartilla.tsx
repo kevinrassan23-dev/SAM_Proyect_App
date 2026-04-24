@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, Pressable } from 'react-native';
-import { Text } from 'react-native-paper';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { styles } from '@/styles/screens/auth/IngresarCartillaStyle';
 import { pacientesService } from '@/services/firebase';
+import { styles } from '@/styles/screens/auth/IngresarCartillaStyle';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from "react-i18next";
+import "@/language/config/ConfigIdiomas";
+import { Pressable, TextInput, View, Image } from 'react-native';
+import { Text } from 'react-native-paper';
 
 function IngresarCartilla() {
-  const [ultimos4, setUltimos4] = useState('');
+  // --- ESTADOS Y REFERENCIAS ---
+  const [digitos16, setDigitos16] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [intentos, setIntentos] = useState(0);
@@ -17,7 +20,11 @@ function IngresarCartilla() {
 
   const MAX_INTENTOS = 3;
   const TIEMPO_BLOQUEO = 60;
+  const { t } = useTranslation();
 
+  // --- EFECTOS DE INICIALIZACIÓN Y BLOQUEO ---
+
+  /** Recupera el estado de bloqueo almacenado en disco */
   useEffect(() => {
     const revisarBloqueo = async () => {
       try {
@@ -32,221 +39,132 @@ function IngresarCartilla() {
           }
         }
       } catch (err) {
-        console.error('❌ Error:', err);
+        console.error(`[${new Date().toLocaleTimeString()}] Error AsyncStorage:`, err);
       }
     };
-
     revisarBloqueo();
   }, []);
 
-  // ✅ ACTUALIZADO: Timer con reseteo de intentos
+  /** Maneja el contador regresivo del bloqueo temporal */
   useEffect(() => {
     if (segundosBloqueo <= 0) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
-
     timerRef.current = setInterval(() => {
       setSegundosBloqueo(prev => {
         if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          
-          // ✅ Cuando se cumple el bloqueo, resetear intentos
+          clearInterval(timerRef.current!);
           setIntentos(0);
           guardarIntentos(0);
-          
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [segundosBloqueo]);
 
+  /** Carga intentos previos y enfoca el input al desbloquear */
   useEffect(() => {
     const cargarIntentos = async () => {
-      try {
-        const stored = await AsyncStorage.getItem('intentos_cartilla');
-        if (stored) {
-          setIntentos(parseInt(stored, 10));
-        }
-      } catch (err) {
-        console.error('❌ Error:', err);
-      }
+      const stored = await AsyncStorage.getItem('intentos_cartilla');
+      if (stored) setIntentos(parseInt(stored, 10));
     };
-
     cargarIntentos();
-
-    if (inputRef.current && segundosBloqueo === 0) {
-      inputRef.current.focus();
-    }
+    if (inputRef.current && segundosBloqueo === 0) inputRef.current.focus();
   }, [segundosBloqueo]);
 
-  const guardarIntentos = async (nuevoIntento: number) => {
-    try {
-      await AsyncStorage.setItem('intentos_cartilla', nuevoIntento.toString());
-    } catch (err) {
-      console.error('❌ Error:', err);
-    }
+  const guardarIntentos = async (num: number) => {
+    await AsyncStorage.setItem('intentos_cartilla', num.toString());
   };
 
+  /** Procesa la búsqueda del paciente en Firebase y redirige según perfil */
   const handleValidar = async () => {
     setError('');
-
-    if (segundosBloqueo > 0) {
-      setError(`Sistema bloqueado. Intenta en ${formatearTiempo(segundosBloqueo)}`);
-      return;
-    }
-
-    if (ultimos4.length !== 4) {
-      setError('Ingresa exactamente 4 dígitos');
-      return;
-    }
+    const ts = new Date().toLocaleTimeString();
+    if (segundosBloqueo > 0 || digitos16.length !== 16) return;
 
     setLoading(true);
-
     try {
-      console.log('🔍 Buscando cartilla...');
-
-      const paciente = await pacientesService.obtenerPorUltimos4Digitos(ultimos4);
+      console.log(`[${ts}] Validando cartilla: ${digitos16}`);
+      const paciente = await pacientesService.obtenerCartillaCompleta(digitos16);
 
       if (!paciente) {
+        // Lógica de fallo de intentos
         const nuevoIntento = intentos + 1;
         setIntentos(nuevoIntento);
         await guardarIntentos(nuevoIntento);
-        setUltimos4('');
-
         if (nuevoIntento >= MAX_INTENTOS) {
-          const expiracion = Date.now() + TIEMPO_BLOQUEO * 1000;
-          await AsyncStorage.setItem(
-            'bloqueo_cartilla',
-            JSON.stringify({ expiracion })
-          );
+          const exp = Date.now() + TIEMPO_BLOQUEO * 1000;
+          await AsyncStorage.setItem('bloqueo_cartilla', JSON.stringify({ expiracion: exp }));
           setSegundosBloqueo(TIEMPO_BLOQUEO);
         } else {
-          setError(
-            `Cartilla no encontrada. Intento ${nuevoIntento} de 3.`
-          );
+          setError(`${t("IngresarCartilla.ERROR31")} ${nuevoIntento} / ${MAX_INTENTOS}`);
         }
-
         setLoading(false);
         return;
       }
 
-      console.log('✅ Cartilla encontrada:', paciente.Nombre_Paciente);
-
+      // Éxito: Navegación según disponibilidad de teléfono
+      console.log(`[${ts}] Paciente localizado: ${paciente.Nombre_Paciente}`);
       await AsyncStorage.removeItem('intentos_cartilla');
-      await AsyncStorage.removeItem('bloqueo_cartilla');
-      setIntentos(0);
-
-      if (!paciente.Num_Telefono || !paciente.Num_Telefono.trim()) {
-        console.log('⚠️ Sin teléfono, a Hall');
-
-        const { recetasService } = await import('@/services/firebase');
-        const medicamentosRecetaData = await recetasService.obtenerMedicamentosReceta(
-          paciente.DNI
-        );
-
-        const nombresMedicamentos = medicamentosRecetaData
-          .map((m: any) => m.nombre)
-          .filter((nombre: string) => nombre && nombre.trim() !== '');
-
-        router.push({
-          pathname: '/screens/shop/Hall',
-          params: {
-            dni: paciente.DNI,
-            nombre: paciente.Nombre_Paciente,
-            tipo: paciente.Tipo_Paciente,
-            cartilla: paciente.Num_Cartilla,
-            telefono: '',
-            tieneReceta: medicamentosRecetaData.length > 0 ? 'true' : 'false',
-            medicamentosReceta: nombresMedicamentos.join(','),
-          },
-        });
-        return;
+      
+      if (!paciente.Num_Telefono?.trim()) {
+        console.log(`[${ts}] Sin teléfono vinculado, acceso directo.`);
+        router.push({ pathname: '/screens/home/Home', params: { dni: paciente.DNI, nombre: paciente.Nombre_Paciente, cartilla: paciente.Num_Cartilla } });
+      } else {
+        router.push({ pathname: '/screens/auth/VerificacionMovil', params: { ...paciente, cartilla: paciente.Num_Cartilla, telefono: paciente.Num_Telefono } });
       }
-
-      console.log('📱 A verificación de teléfono');
-
-      router.push({
-        pathname: '/screens/auth/VerificacionMovil',
-        params: {
-          dni: paciente.DNI,
-          nombre: paciente.Nombre_Paciente,
-          tipo: paciente.Tipo_Paciente,
-          cartilla: paciente.Num_Cartilla,
-          telefono: paciente.Num_Telefono,
-        },
-      });
-
-    } catch (error: any) {
-      console.error('❌ Error:', error.message);
-      setError('Error en la búsqueda');
+    } catch (e: any) {
+      console.error(`[${ts}] Error servicio:`, e.message);
+      setError(t("IngresarCartilla.ERROR4"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVolver = () => {
-    router.push('/screens/shop/Hall');
-  };
+  const formatearTiempo = (s: number) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
 
-  const formatearTiempo = (segundos: number) => {
-    const minutos = Math.floor(segundos / 60);
-    const secs = segundos % 60;
-    return `${minutos}:${secs.toString().padStart(2, '0')}`;
-  };
-
+  // --- ESTRUCTURA DE INTERFAZ (UI) ---
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Ingresa los últimos 4 dígitos de tu cartilla</Text>
-
-      <TextInput
-        ref={inputRef}
-        placeholder="Ej: 123A"
-        value={ultimos4}
-        onChangeText={text => setUltimos4(text.toUpperCase())}
-        style={[
-          styles.input,
-        ]}
-        maxLength={4}
-        editable={!loading}
-        placeholderTextColor="#ccc"
+      {/* Encabezado e Imagen descriptiva */}
+      <Text style={styles.title}>{t("IngresarCartilla.INGRESAR")}</Text>
+      <Image 
+        source={require('@/assets/images/Tarjeta-sanitaria.png')} 
+        style={{ width: '85%', height: 160, resizeMode: 'contain', marginBottom: 24 }} 
       />
 
+      {/* Campo de entrada de texto */}
+      <TextInput
+        ref={inputRef}
+        placeholder={t("Ej: BBBBBBBBB1234567")}
+        value={digitos16}
+        onChangeText={text => setDigitos16(text.toUpperCase())}
+        style={styles.input}
+        maxLength={16}
+        editable={!loading}
+      />
+
+      {/* Mensajes de feedback (Error o Bloqueo) */}
       {error !== '' && <Text style={styles.error}>{error}</Text>}
+      {segundosBloqueo > 0 && <Text style={styles.timerText}>{t("IngresarCartilla.BLOQUEADO")} {segundosBloqueo}s</Text>}
 
-      {segundosBloqueo > 0 && (
-        <Text style={styles.timerText}>
-          Sistema bloqueado {segundosBloqueo}s
-        </Text>
-      )}
-
+      {/* Botonera de navegación */}
       <View style={styles.VerificacionMovilContainer}>
-        <Pressable
-          style={[
-            styles.button,
-            (loading || ultimos4.length !== 4 || segundosBloqueo > 0) && {
-              opacity: 0.5,
-            },
-          ]}
-          onPress={handleValidar}
-          disabled={loading || ultimos4.length !== 4 || segundosBloqueo > 0}
+        <Pressable 
+          style={[styles.button, (loading || digitos16.length !== 16 || segundosBloqueo > 0) && { opacity: 0.5 }]} 
+          onPress={handleValidar} 
+          disabled={loading || digitos16.length !== 16 || segundosBloqueo > 0}
         >
           <Text style={styles.buttonText}>
-            {segundosBloqueo > 0
-              ? `BLOQUEADO ${formatearTiempo(segundosBloqueo)}`
-              : loading
-                ? 'VALIDANDO...'
-                : 'ACEPTAR'}
+            {segundosBloqueo > 0 ? `${t("IngresarCartilla.BLOQ")} ${formatearTiempo(segundosBloqueo)}` : loading ? t("IngresarCartilla.VALIDANDO") : t("IngresarCartilla.ACEPTAR")}
           </Text>
         </Pressable>
 
-        <Pressable style={styles.button} onPress={handleVolver} disabled={loading}>
-          <Text style={styles.buttonText}>VOLVER</Text>
+        <Pressable style={styles.button} onPress={() => router.push('/screens/home/Home')} disabled={loading}>
+          <Text style={styles.buttonText}>{t("IngresarCartilla.VOLVER")}</Text>
         </Pressable>
       </View>
     </View>
